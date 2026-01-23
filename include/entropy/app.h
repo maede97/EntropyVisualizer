@@ -1,14 +1,12 @@
 #pragma once
 #include <entropy/ui.h>
 
-#include "imgui.h"
 #include <atomic>
 #include <entropy/core.h>
 #include <entropy/hex_display_feature_manager.h>
 #include <filesystem>
 #include <fstream>
 #include <functional>
-#include <glad/glad.h>
 #include <map>
 #include <memory>
 #include <string>
