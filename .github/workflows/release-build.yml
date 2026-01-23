@@ -43,12 +43,12 @@ jobs:
       if: runner.os == 'Linux'
       uses: actions/upload-artifact@v6
       with:
-        name: EntropyVisualizer
+        name: EntropyVisualizer (Linux)
         path: build/EntropyVisualizer
      
     - name: Upload artifact (Windows)
       if: runner.os == 'Windows'
       uses: actions/upload-artifact@v6
       with:
-        name: EntropyVisualizer.exe
+        name: EntropyVisualizer (Windows)
         path: build/Release/EntropyVisualizer.exe
