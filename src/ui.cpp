@@ -64,6 +64,7 @@ void renderHexViewWindow(UiState &uiState) {
                         ImGui::Text("%02X ", uiState.currentSectorData[i + j]);
                         ImGui::SameLine();
                     }
+                    ImGui::Text(" | ");
                     ImGui::SameLine();
                     for (size_t j = 0; j < 16 && i + j < uiState.currentSectorData.size(); ++j) {
                         char c = uiState.currentSectorData[i + j];

@@ -13,6 +13,8 @@
 
 namespace entropy {
 
+#define ALL_FILES_FILTER "All files {((.*))}"
+
 int parseCommandLine(int argc, char **argv, AppState &state) {
     state.originalFile = ""; // Reset
     if (argc == 3) {
@@ -161,7 +163,7 @@ void handleKeyboardShortcuts(AppState &state, UiState &uiState, IGFD::FileDialog
 
     if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_G)) {
         config.path = "";
-        ImGuiFileDialog::Instance()->OpenDialog("GenerateFileDlg", "Select Source File", ".*", config);
+        ImGuiFileDialog::Instance()->OpenDialog("GenerateFileDlg", "Select Source File", ALL_FILES_FILTER, config);
     }
 
     // Handle arrow keys for moving selected sector
@@ -302,7 +304,8 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Generate Cache")) {
-                    ImGuiFileDialog::Instance()->OpenDialog("GenerateFileDlg", "Select Source File", ".*", config);
+                    ImGuiFileDialog::Instance()->OpenDialog("GenerateFileDlg", "Select Source File", ALL_FILES_FILTER,
+                                                            config);
                 }
                 if (ImGui::MenuItem("Open Cache")) {
                     ImGuiFileDialog::Instance()->OpenDialog("OpenCacheDlg", "Open Cache File", ".cache.bin", config);
@@ -431,7 +434,8 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
             if (ImGui::Button("Select Source File")) {
                 IGFD::FileDialogConfig config;
                 config.path = "";
-                ImGuiFileDialog::Instance()->OpenDialog("SelectSourceDlg", "Select Source File", ".*", config);
+                ImGuiFileDialog::Instance()->OpenDialog("SelectSourceDlg", "Select Source File", ALL_FILES_FILTER,
+                                                        config);
             }
         }
         if (!state.originalFile.empty()) {
