@@ -1,6 +1,6 @@
-#include "core.h"
 #include <algorithm>
 #include <cmath>
+#include <entropy/core.h>
 
 namespace entropy {
 

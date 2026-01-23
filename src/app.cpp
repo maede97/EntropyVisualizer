@@ -1,13 +1,8 @@
-#include "app.h"
-#include "cache.h"
-#include "icon.h"
-#include "version.h"
-#include <GL/gl.h>
-#include <GLFW/glfw3.h>
 #include <algorithm>
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
-#include <imgui.h>
+#include <entropy/app.h>
+#include <entropy/cache.h>
+#include <entropy/icon.h>
+#include <entropy/version.h>
 #include <iostream>
 #include <string>
 
@@ -23,8 +18,7 @@ int parseCommandLine(int argc, char **argv, AppState &state) {
         std::string source_path = argv[2];
 
         const std::string cache_ext = ".cache.bin";
-        if (cache_path.size() >= cache_ext.size() &&
-            cache_path.substr(cache_path.size() - cache_ext.size()) == cache_ext) {
+        if (cache_path.size() >= cache_ext.size() && cache_path.substr(cache_path.size() - cache_ext.size()) == cache_ext) {
             state.lastCacheFile = cache_path;
             state.originalFile = source_path;
             state.file.open(cache_path, std::ios::binary);
@@ -46,7 +40,8 @@ int parseCommandLine(int argc, char **argv, AppState &state) {
 
             state.redrawBlock = true;
         } else {
-            std::cerr << "First argument must be a .cache.bin file when providing two arguments.\n";
+            std::cerr << "First argument must be a .cache.bin file when "
+                         "providing two arguments.\n";
             return 1;
         }
     } else if (argc == 2) {
@@ -77,7 +72,8 @@ int parseCommandLine(int argc, char **argv, AppState &state) {
             state.redrawBlock = true;
             state.promptForSource = true;
         } else {
-            // Start cache generation for the provided source file (background thread)
+            // Start cache generation for the provided source file (background
+            // thread)
             state.showCacheGen = true;
             cacheDone = false;
             cacheFailed = false;
@@ -186,15 +182,13 @@ void handleKeyboardShortcuts(AppState &state, UiState &uiState, IGFD::FileDialog
         if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow) && uiState.highlighted_sector > 0) {
             uiState.highlighted_sector--;
             moved = true;
-        } else if (ImGui::IsKeyPressed(ImGuiKey_RightArrow) &&
-                   uiState.highlighted_sector < state.all_cache_data.size() - 1) {
+        } else if (ImGui::IsKeyPressed(ImGuiKey_RightArrow) && uiState.highlighted_sector < state.all_cache_data.size() - 1) {
             uiState.highlighted_sector++;
             moved = true;
         } else if (ImGui::IsKeyPressed(ImGuiKey_UpArrow) && uiState.highlighted_sector >= state.block_width) {
             uiState.highlighted_sector -= state.block_width;
             moved = true;
-        } else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) &&
-                   uiState.highlighted_sector + state.block_width < state.all_cache_data.size()) {
+        } else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) && uiState.highlighted_sector + state.block_width < state.all_cache_data.size()) {
             uiState.highlighted_sector += state.block_width;
             moved = true;
         }
@@ -233,8 +227,7 @@ void initializeWindowAndGL(GLFWwindow *&window, GLuint &tex) {
         return;
 
     const char *glsl_version = "#version 130";
-    window = glfwCreateWindow(1800, 1200, (std::string("Entropy Visualizer ") + std::string(VERSION)).c_str(), nullptr,
-                              nullptr);
+    window = glfwCreateWindow(1800, 1200, (std::string("Entropy Visualizer ") + std::string(VERSION)).c_str(), nullptr, nullptr);
     if (!window)
         return;
 
@@ -306,8 +299,7 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
         }
 
         if (state.redrawBlock) {
-            if (load_block_from_file(state.file, state.current_block, block_size, state.file_size,
-                                     state.block_buffer)) {
+            if (load_block_from_file(state.file, state.current_block, block_size, state.file_size, state.block_buffer)) {
                 upload_block(tex, state.block_buffer, state.block_width, state.block_height);
             } else {
                 // Clear visualization if load fails
@@ -321,8 +313,7 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Generate Cache")) {
-                    ImGuiFileDialog::Instance()->OpenDialog("GenerateFileDlg", "Select Source File", ALL_FILES_FILTER,
-                                                            config);
+                    ImGuiFileDialog::Instance()->OpenDialog("GenerateFileDlg", "Select Source File", ALL_FILES_FILTER, config);
                 }
                 if (ImGui::MenuItem("Open Cache")) {
                     ImGuiFileDialog::Instance()->OpenDialog("OpenCacheDlg", "Open Cache File", ".cache.bin", config);
@@ -342,6 +333,12 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 }
                 if (ImGui::MenuItem("Exit")) {
                     glfwSetWindowShouldClose(window, GLFW_TRUE);
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Hex Display Features")) {
+                for (const auto *feature : state.hexDisplayFeatureManager->getFeatures()) {
+                    ImGui::MenuItem(feature->getName().c_str(), NULL, &state.featureEnabled.at(feature->getName()));
                 }
                 ImGui::EndMenu();
             }
@@ -449,8 +446,7 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
             if (ImGui::Button("Select Source File")) {
                 IGFD::FileDialogConfig config;
                 config.path = "";
-                ImGuiFileDialog::Instance()->OpenDialog("SelectSourceDlg", "Select Source File", ALL_FILES_FILTER,
-                                                        config);
+                ImGuiFileDialog::Instance()->OpenDialog("SelectSourceDlg", "Select Source File", ALL_FILES_FILTER, config);
             }
         }
         if (!state.showCacheGen && !state.originalFile.empty()) {
@@ -465,13 +461,13 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
         // UI Windows
         renderAboutWindow(uiState);
         renderHelpWindow(uiState);
-        renderHexViewWindow(uiState);
+        renderHexViewWindow(uiState, state);
         renderSearchWindow(uiState, state, loadHexData);
 
         // Visualization
         ImDrawList *draw_list = ImGui::GetBackgroundDrawList();
-        renderVisualization(draw_list, tex, state.block_buffer, state.zoom, state.pan_offset, state.current_block,
-                            block_size, state.block_width, state.block_height, uiState, loadHexData);
+        renderVisualization(draw_list, tex, state.block_buffer, state.zoom, state.pan_offset, state.current_block, block_size, state.block_width,
+                            state.block_height, uiState, loadHexData);
 
         // Update autoplay
         updateAutoplay(state);

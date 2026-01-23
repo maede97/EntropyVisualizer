@@ -47,6 +47,10 @@ add_library(cache STATIC src/cache.cpp)
 target_include_directories(cache PUBLIC include)
 target_link_libraries(cache PUBLIC core)
 
+# --- Hex Display Feature Manager library ---
+add_library(hex_display_feature_manager STATIC src/hex_display_feature_manager.cpp)
+target_include_directories(hex_display_feature_manager PUBLIC include)
+
 # --- UI library ---
 add_library(ui STATIC src/ui.cpp)
 target_include_directories(ui PUBLIC include external/imgui external/ImGuiFileDialog)
@@ -55,7 +59,7 @@ target_link_libraries(ui PUBLIC core imgui glad glfw imguifiledialog)
 # --- App library ---
 add_library(app STATIC src/app.cpp)
 target_include_directories(app PUBLIC include ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(app PUBLIC core cache ui imgui glad glfw)
+target_link_libraries(app PUBLIC core cache ui imgui glad glfw hex_display_feature_manager)
 
 if(WIN32)
     add_executable(EntropyVisualizer WIN32 main.cpp)

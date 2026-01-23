@@ -17,7 +17,6 @@ extern std::atomic<bool> cacheDone;
 extern std::atomic<bool> cacheFailed;
 
 void generateCacheThreaded(const std::string &input_file, const std::string &cache_file);
-bool load_block_from_file(std::ifstream &file, size_t block_index, size_t block_size, size_t file_size,
-                          std::vector<uint8_t> &buffer);
+bool load_block_from_file(std::ifstream &file, size_t block_index, size_t block_size, size_t file_size, std::vector<uint8_t> &buffer);
 
 } // namespace entropy

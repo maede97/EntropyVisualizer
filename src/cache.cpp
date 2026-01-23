@@ -1,6 +1,6 @@
-#include "cache.h"
-#include "core.h"
 #include <algorithm>
+#include <entropy/cache.h>
+#include <entropy/core.h>
 #include <fstream>
 #include <thread>
 
@@ -11,8 +11,7 @@ size_t cacheTotal = 0;
 std::atomic<bool> cacheDone = true;
 std::atomic<bool> cacheFailed = false;
 
-bool load_block_from_file(std::ifstream &file, size_t block_index, size_t block_size, size_t file_size,
-                          std::vector<uint8_t> &buffer) {
+bool load_block_from_file(std::ifstream &file, size_t block_index, size_t block_size, size_t file_size, std::vector<uint8_t> &buffer) {
     size_t start = block_index * block_size;
     if (start >= file_size)
         return false;

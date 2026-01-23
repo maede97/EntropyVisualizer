@@ -1,7 +1,7 @@
 #pragma once
 
-#include "version.h"
 #include <cstdint>
+#include <entropy/version.h>
 #include <string>
 
 namespace entropy {
@@ -9,8 +9,8 @@ namespace entropy {
 const size_t DEFAULT_BLOCK_WIDTH = 256;
 const size_t DEFAULT_BLOCK_HEIGHT = 256;
 
-const std::string ABOUT_STRING = "EntropyVisualizer\nMatthias Hüppi, maede97@hotmail.com\nVersion " +
-                                 std::string(VERSION) + " - " + std::string(DATE);
+const std::string ABOUT_STRING =
+    "EntropyVisualizer\nMatthias Hüppi, maede97@hotmail.com\nVersion " + std::string(VERSION) + " - " + std::string(DATE);
 const std::string HELP_STRING = R"(
 Entropy Visualizer - User Guide
 
@@ -51,9 +51,7 @@ Tips:
 
 double unpack_value(uint8_t packed);
 uint8_t pack_value(double value);
-template <typename T> T clip(const T &n, const T &lower, const T &upper) {
-    return std::max(lower, std::min(n, upper));
-}
+template <typename T> T clip(const T &n, const T &lower, const T &upper) { return std::max(lower, std::min(n, upper)); }
 double shannon_entropy(const unsigned char *data, size_t size);
 void value_to_color(float v, uint8_t &r, uint8_t &g, uint8_t &b);
 

@@ -6,12 +6,12 @@
 #include <imgui.h>
 #include <iostream>
 
-#include "app.h"
-#include "cache.h"
-#include "core.h"
-#include "icon.h"
-#include "ui.h"
-#include "version.h"
+#include <entropy/app.h>
+#include <entropy/cache.h>
+#include <entropy/core.h>
+#include <entropy/icon.h>
+#include <entropy/ui.h>
+#include <entropy/version.h>
 
 int main(int argc, char **argv) {
     entropy::AppState appState;
@@ -19,6 +19,14 @@ int main(int argc, char **argv) {
 
     if (entropy::parseCommandLine(argc, argv, appState) != 0) {
         return 1;
+    }
+
+    // Initialize hex display feature manager
+    appState.hexDisplayFeatureManager = std::make_unique<entropy::HexDisplayFeatureManager>();
+
+    // Initialize feature enabled states
+    for (const auto *feature : appState.hexDisplayFeatureManager->getFeatures()) {
+        appState.featureEnabled[feature->getName()] = true;
     }
 
     GLFWwindow *window;
@@ -42,8 +50,7 @@ int main(int argc, char **argv) {
     });
 
     IGFD::FileDialogConfig config;
-    config.flags = ImGuiFileDialogFlags_ShowDevicesButton | ImGuiFileDialogFlags_Modal |
-                   ImGuiFileDialogFlags_DisableCreateDirectoryButton;
+    config.flags = ImGuiFileDialogFlags_ShowDevicesButton | ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_DisableCreateDirectoryButton;
 
     auto loadHexData = [&](size_t sector_index) {
         uiState.currentSectorIndex = sector_index;
