@@ -199,7 +199,8 @@ void renderSearchWindow(UiState &uiState, AppState &appState, std::function<void
     }
 }
 
-void renderVisualization(ImDrawList *draw_list, GLuint tex, const std::vector<uint8_t> &block_buffer, float zoom, ImVec2 pan_offset, size_t current_block, size_t block_size, size_t block_width, size_t block_height, UiState &uiState,
+void renderVisualization(ImDrawList *draw_list, GLuint tex, const std::vector<uint8_t> &block_buffer, float zoom, ImVec2 pan_offset,
+                         size_t current_block, size_t block_size, size_t block_width, size_t block_height, UiState &uiState,
                          std::function<void(size_t)> loadHexData) {
     ImVec2 img_size(block_width * zoom, block_height * zoom);
     ImVec2 img_tl = ImVec2(-pan_offset.x, -pan_offset.y);

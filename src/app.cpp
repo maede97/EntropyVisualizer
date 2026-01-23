@@ -328,17 +328,17 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 if (ImGui::MenuItem("About")) {
                     uiState.showAboutUs = true;
                 }
-                if (ImGui::BeginMenu("Hex Display Features")) {
-                    for (const auto *feature : state.hexDisplayFeatureManager->getFeatures()) {
-                        ImGui::MenuItem(feature->getName().c_str(), NULL, &state.featureEnabled[feature->getName()]);
-                    }
-                    ImGui::EndMenu();
-                }
                 if (ImGui::MenuItem("Help")) {
                     uiState.showHelp = true;
                 }
                 if (ImGui::MenuItem("Exit")) {
                     glfwSetWindowShouldClose(window, GLFW_TRUE);
+                }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Hex Display Features")) {
+                for (const auto *feature : state.hexDisplayFeatureManager->getFeatures()) {
+                    ImGui::MenuItem(feature->getName().c_str(), NULL, &state.featureEnabled.at(feature->getName()));
                 }
                 ImGui::EndMenu();
             }
