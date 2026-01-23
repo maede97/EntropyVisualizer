@@ -2,8 +2,8 @@ name: Build and Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 jobs:
   build:
@@ -39,15 +39,16 @@ jobs:
         cmake .. -DCMAKE_BUILD_TYPE=Release
         cmake --build . --config Release
 
-    - name: Upload release asset
-      run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          ASSET_NAME="EntropyVisualizer"
-          BINARY_PATH="build/EntropyVisualizer"
-        else
-          ASSET_NAME="EntropyVisualizer.exe"
-          BINARY_PATH="build/Release/EntropyVisualizer.exe"
-        fi
-        gh release upload ${{ github.ref_name }} "$BINARY_PATH#$ASSET_NAME"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload artifact (Linux)
+      if: runner.os == 'Linux'
+      uses: actions/upload-artifact@v6
+      with:
+        name: EntropyVisualizer
+        path: build/EntropyVisualizer
+     
+    - name: Upload artifact (Windows)
+      if: runner.os == 'Windows'
+      uses: actions/upload-artifact@v6
+      with:
+        name: EntropyVisualizer.exe
+        path: build/Release/EntropyVisualizer.exe
