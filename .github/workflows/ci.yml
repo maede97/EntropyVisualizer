@@ -17,6 +17,10 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Load submodules
+      run:
+        git submodules update --init --recursive
+
     - name: Install dependencies (Linux)
       if: runner.os == 'Linux'
       run: |
