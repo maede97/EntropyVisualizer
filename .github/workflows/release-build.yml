@@ -1,0 +1,53 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake libgl1-mesa-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libwayland-dev libxkbcommon-dev
+
+    - name: Configure and build (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make
+
+    - name: Configure and build (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake --build . --config Release
+
+    - name: Upload release asset
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          ASSET_NAME="EntropyVisualizer"
+          BINARY_PATH="build/EntropyVisualizer"
+        else
+          ASSET_NAME="EntropyVisualizer.exe"
+          BINARY_PATH="build/Release/EntropyVisualizer.exe"
+        fi
+        gh release upload ${{ github.ref_name }} "$BINARY_PATH#$ASSET_NAME"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
