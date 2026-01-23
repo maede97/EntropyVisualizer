@@ -113,7 +113,7 @@ void renderHexViewWindow(UiState &uiState, const AppState &appState) {
                         size_t offset = i + j;
                         if (highlightMap.count(offset)) {
                             ImGui::TextColored(
-                                ImColor(highlightMap[offset].first), "%c ",
+                                ImColor(highlightMap[offset].first), "%c",
                                 (c >= 32 && c <= 126) ? c : '.');
                         } else {
                             ImGui::Text("%c", (c >= 32 && c <= 126) ? c : '.');
