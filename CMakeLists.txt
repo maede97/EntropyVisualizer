@@ -49,7 +49,7 @@ target_link_libraries(cache PUBLIC core)
 
 # --- Hex Display Feature Manager library ---
 add_library(hex_display_feature_manager STATIC src/hex_display_feature_manager.cpp)
-target_include_directories(hex_display_feature_manager PUBLIC include src external/imgui)
+target_include_directories(hex_display_feature_manager PUBLIC include)
 
 # --- UI library ---
 add_library(ui STATIC src/ui.cpp)
@@ -77,9 +77,6 @@ if (WIN32)
     set_target_properties(EntropyVisualizer PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
 )
 endif()
-
-# --- Hex Display Features ---
-# Features are now built statically as part of the main build
 
 # --- Platform-specific OpenGL linking for visualizer ---
 if (WIN32)
