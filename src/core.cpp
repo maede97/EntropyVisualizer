@@ -1,6 +1,6 @@
-#include "core.h"
 #include <algorithm>
 #include <cmath>
+#include <entropy/core.h>
 
 namespace entropy {
 
@@ -13,7 +13,8 @@ double unpack_value(uint8_t packed) {
 uint8_t pack_value(double value) {
     value = clip(value, 0.0, 7.99);
     uint8_t int_part = static_cast<uint8_t>(value);
-    uint8_t frac_part = static_cast<uint8_t>(std::round((value - int_part) * 32.0));
+    uint8_t frac_part =
+        static_cast<uint8_t>(std::round((value - int_part) * 32.0));
     if (frac_part > 31)
         frac_part = 31;
     return (int_part << 5) | frac_part;

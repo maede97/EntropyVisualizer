@@ -1,13 +1,16 @@
 #pragma once
-#include "ui.h"
+#include <entropy/ui.h>
 
-#include "core.h"
 #include "imgui.h"
 #include <atomic>
+#include <entropy/core.h>
+#include <entropy/hex_display_feature_manager.h>
 #include <filesystem>
 #include <fstream>
 #include <functional>
 #include <glad/glad.h>
+#include <map>
+#include <memory>
 #include <string>
 #include <thread>
 #include <vector>
@@ -68,14 +71,22 @@ struct AppState {
     bool autoplay = false;
     float autoplay_interval = 0.5f;
     double last_autoplay_time = 0.0;
+
+    // Hex Display Features
+    std::unique_ptr<HexDisplayFeatureManager> hexDisplayFeatureManager;
+    std::map<std::string, bool> featureEnabled;
 };
 
 int parseCommandLine(int argc, char **argv, AppState &state);
-void handleDroppedFiles(AppState &state, UiState &uiState, std::function<void(size_t)> loadHexData);
-void handleKeyboardShortcuts(AppState &state, UiState &uiState, IGFD::FileDialogConfig &config, GLFWwindow *window, std::function<void(size_t)> loadHexData);
+void handleDroppedFiles(AppState &state, UiState &uiState,
+                        std::function<void(size_t)> loadHexData);
+void handleKeyboardShortcuts(AppState &state, UiState &uiState,
+                             IGFD::FileDialogConfig &config, GLFWwindow *window,
+                             std::function<void(size_t)> loadHexData);
 void updateAutoplay(AppState &state);
 void initializeWindowAndGL(GLFWwindow *&window, GLuint &tex);
-void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState, IGFD::FileDialogConfig &config,
+void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
+              IGFD::FileDialogConfig &config,
               std::function<void(size_t)> loadHexData);
 
 } // namespace entropy

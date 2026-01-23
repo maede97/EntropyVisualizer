@@ -1,7 +1,7 @@
 #pragma once
 
-#include "version.h"
 #include <cstdint>
+#include <entropy/version.h>
 #include <string>
 
 namespace entropy {
@@ -9,8 +9,9 @@ namespace entropy {
 const size_t DEFAULT_BLOCK_WIDTH = 256;
 const size_t DEFAULT_BLOCK_HEIGHT = 256;
 
-const std::string ABOUT_STRING = "EntropyVisualizer\nMatthias Hüppi, maede97@hotmail.com\nVersion " +
-                                 std::string(VERSION) + " - " + std::string(DATE);
+const std::string ABOUT_STRING =
+    "EntropyVisualizer\nMatthias Hüppi, maede97@hotmail.com\nVersion " +
+    std::string(VERSION) + " - " + std::string(DATE);
 const std::string HELP_STRING = R"(
 Entropy Visualizer - User Guide
 
