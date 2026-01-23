@@ -12,9 +12,7 @@ class HexDisplayFeatureManager {
     HexDisplayFeatureManager();
     ~HexDisplayFeatureManager() = default;
     void loadFeatures();
-    const std::vector<HexDisplayFeature *> &getFeatures() const {
-        return features;
-    }
+    const std::vector<HexDisplayFeature *> &getFeatures() const { return features; }
 
   private:
     std::vector<HexDisplayFeature *> features;

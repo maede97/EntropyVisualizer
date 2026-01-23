@@ -11,9 +11,7 @@ size_t cacheTotal = 0;
 std::atomic<bool> cacheDone = true;
 std::atomic<bool> cacheFailed = false;
 
-bool load_block_from_file(std::ifstream &file, size_t block_index,
-                          size_t block_size, size_t file_size,
-                          std::vector<uint8_t> &buffer) {
+bool load_block_from_file(std::ifstream &file, size_t block_index, size_t block_size, size_t file_size, std::vector<uint8_t> &buffer) {
     size_t start = block_index * block_size;
     if (start >= file_size)
         return false;
@@ -32,8 +30,7 @@ bool load_block_from_file(std::ifstream &file, size_t block_index,
     return file.good() || file.eof();
 }
 
-void generateCacheThreaded(const std::string &input_file,
-                           const std::string &cache_file) {
+void generateCacheThreaded(const std::string &input_file, const std::string &cache_file) {
     const size_t SECTOR_SIZE = 512;
 
     std::string filename_only = fs::path(input_file).filename().string();

@@ -5,9 +5,7 @@
 #include <vector>
 
 #ifndef RGBA_COLOR
-#define RGBA_COLOR(R, G, B, A)                                                 \
-    (((unsigned int)(A) << 24) | ((unsigned int)(B) << 0) |                    \
-     ((unsigned int)(G) << 8) | ((unsigned int)(R) << 16))
+#define RGBA_COLOR(R, G, B, A) (((unsigned int)(A) << 24) | ((unsigned int)(B) << 0) | ((unsigned int)(G) << 8) | ((unsigned int)(R) << 16))
 #endif
 
 namespace entropy {
@@ -25,9 +23,7 @@ class HexDisplayFeature {
     virtual std::string getAuthor() const = 0;
     virtual int getPriority() const = 0; // for overlapping highlights, higher
                                          // priority takes precedence
-    virtual std::vector<Highlight>
-    getHighlights(const std::vector<uint8_t> &sectorData,
-                  size_t sectorIndex) const = 0;
+    virtual std::vector<Highlight> getHighlights(const std::vector<uint8_t> &sectorData, size_t sectorIndex) const = 0;
 };
 
 } // namespace entropy

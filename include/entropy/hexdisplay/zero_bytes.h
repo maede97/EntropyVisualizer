@@ -15,13 +15,11 @@ class ZeroBytesFeature : public HexDisplayFeature {
     std::string getAuthor() const override { return "Entropy Visualizer Team"; }
     int getPriority() const override { return 1; }
 
-    std::vector<Highlight> getHighlights(const std::vector<uint8_t> &sectorData,
-                                         size_t sectorIndex) const override {
+    std::vector<Highlight> getHighlights(const std::vector<uint8_t> &sectorData, size_t sectorIndex) const override {
         std::vector<Highlight> highlights;
         for (size_t i = 0; i < sectorData.size(); i++) {
             if (sectorData[i] == 0) {
-                highlights.push_back(
-                    {i, RGBA_COLOR(255, 255, 255, 100)}); // Gray highlight
+                highlights.push_back({i, RGBA_COLOR(255, 255, 255, 100)}); // Gray highlight
             }
         }
         return highlights;

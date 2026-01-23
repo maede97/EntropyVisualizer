@@ -15,14 +15,11 @@ class AA55FinderFeature : public HexDisplayFeature {
     std::string getAuthor() const override { return "Entropy Visualizer Team"; }
     int getPriority() const override { return 1; }
 
-    std::vector<Highlight> getHighlights(const std::vector<uint8_t> &sectorData,
-                                         size_t sectorIndex) const override {
+    std::vector<Highlight> getHighlights(const std::vector<uint8_t> &sectorData, size_t sectorIndex) const override {
         std::vector<Highlight> highlights;
         // Scan for 0x55 0xAA at sector end (510-511)
-        if (sectorData.size() >= 512 && sectorData[510] == 0x55 &&
-            sectorData[511] == 0xAA) {
-            highlights.push_back(
-                {510, RGBA_COLOR(255, 255, 0, 255)}); // Yellow highlight
+        if (sectorData.size() >= 512 && sectorData[510] == 0x55 && sectorData[511] == 0xAA) {
+            highlights.push_back({510, RGBA_COLOR(255, 255, 0, 255)}); // Yellow highlight
             highlights.push_back({511, RGBA_COLOR(255, 255, 0, 255)});
         }
         return highlights;

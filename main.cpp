@@ -22,12 +22,10 @@ int main(int argc, char **argv) {
     }
 
     // Initialize hex display feature manager
-    appState.hexDisplayFeatureManager =
-        std::make_unique<entropy::HexDisplayFeatureManager>();
+    appState.hexDisplayFeatureManager = std::make_unique<entropy::HexDisplayFeatureManager>();
 
     // Initialize feature enabled states
-    for (const auto *feature :
-         appState.hexDisplayFeatureManager->getFeatures()) {
+    for (const auto *feature : appState.hexDisplayFeatureManager->getFeatures()) {
         appState.featureEnabled[feature->getName()] = true;
     }
 
@@ -42,21 +40,17 @@ int main(int argc, char **argv) {
 
     // Set up drop callback
     glfwSetWindowUserPointer(window, &appState.droppedFiles);
-    glfwSetDropCallback(
-        window, [](GLFWwindow *window, int count, const char **paths) {
-            auto *dropped = static_cast<std::vector<std::string> *>(
-                glfwGetWindowUserPointer(window));
-            if (!dropped)
-                return;
-            for (int i = 0; i < count; ++i) {
-                dropped->emplace_back(paths[i]);
-            }
-        });
+    glfwSetDropCallback(window, [](GLFWwindow *window, int count, const char **paths) {
+        auto *dropped = static_cast<std::vector<std::string> *>(glfwGetWindowUserPointer(window));
+        if (!dropped)
+            return;
+        for (int i = 0; i < count; ++i) {
+            dropped->emplace_back(paths[i]);
+        }
+    });
 
     IGFD::FileDialogConfig config;
-    config.flags = ImGuiFileDialogFlags_ShowDevicesButton |
-                   ImGuiFileDialogFlags_Modal |
-                   ImGuiFileDialogFlags_DisableCreateDirectoryButton;
+    config.flags = ImGuiFileDialogFlags_ShowDevicesButton | ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_DisableCreateDirectoryButton;
 
     auto loadHexData = [&](size_t sector_index) {
         uiState.currentSectorIndex = sector_index;
@@ -65,9 +59,7 @@ int main(int argc, char **argv) {
             std::ifstream orig_file(appState.originalFile, std::ios::binary);
             if (orig_file) {
                 orig_file.seekg(sector_index * 512);
-                orig_file.read(
-                    reinterpret_cast<char *>(uiState.currentSectorData.data()),
-                    512);
+                orig_file.read(reinterpret_cast<char *>(uiState.currentSectorData.data()), 512);
                 size_t bytes_read = orig_file.gcount();
                 uiState.currentSectorData.resize(bytes_read);
             } else {
