@@ -53,8 +53,6 @@ void renderHexViewWindow(UiState &uiState) {
             ImGui::Text("Sector %zu (0x%zX)", uiState.currentSectorIndex, uiState.currentSectorIndex * 512);
             ImGui::Separator();
 
-            ImGui::Text("file %f", uiState.range_max);
-
             if (uiState.currentSectorData.empty()) {
                 ImGui::Text("No data available");
             } else {
