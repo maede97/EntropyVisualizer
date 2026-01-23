@@ -133,6 +133,19 @@ void handleDroppedFiles(AppState &state, UiState &uiState, std::function<void(si
 
                 state.cacheThread = std::thread([path, cacheFile]() { generateCacheThreaded(path, cacheFile); });
                 state.cacheThread.detach();
+
+                // Clear old visualization
+                state.file.close();
+                state.all_cache_data.clear();
+                state.file_size = 0;
+                state.current_block = 0;
+                state.block_slider = 0;
+                state.redrawBlock = true;
+
+                // Clear hex view
+                uiState.highlighted_sector = SIZE_MAX;
+                uiState.currentSectorData.clear();
+                uiState.currentSectorIndex = 0;
             }
         }
 
@@ -296,9 +309,10 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
             if (load_block_from_file(state.file, state.current_block, block_size, state.file_size,
                                      state.block_buffer)) {
                 upload_block(tex, state.block_buffer, state.block_width, state.block_height);
-                if (uiState.showHexView) {
-                    loadHexData(uiState.highlighted_sector);
-                }
+            } else {
+                // Clear visualization if load fails
+                state.block_buffer.assign(0, 0);
+                upload_block(tex, state.block_buffer, state.block_width, state.block_height);
             }
             state.redrawBlock = false;
         }
@@ -353,22 +367,19 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 if (cacheFailed) {
                     ImGui::Text("Error generating cache file!");
                 } else {
-                    ImGui::Text("Cache generation complete!");
-                    if (ImGui::Button("Open cache file")) {
-                        state.file.close();
-                        state.file.open(state.lastCacheFile, std::ios::binary);
-                        if (state.file) {
-                            state.file.seekg(0, std::ios::end);
-                            state.file_size = (size_t)state.file.tellg();
-                            state.file.seekg(0, std::ios::beg);
-                            state.all_cache_data.resize(state.file_size);
-                            state.file.read(reinterpret_cast<char *>(state.all_cache_data.data()), state.file_size);
-                            state.current_block = 0;
-                            state.block_slider = 0;
-                            state.redrawBlock = true;
-                        }
-                        state.showCacheGen = false;
+                    state.file.close();
+                    state.file.open(state.lastCacheFile, std::ios::binary);
+                    if (state.file) {
+                        state.file.seekg(0, std::ios::end);
+                        state.file_size = (size_t)state.file.tellg();
+                        state.file.seekg(0, std::ios::beg);
+                        state.all_cache_data.resize(state.file_size);
+                        state.file.read(reinterpret_cast<char *>(state.all_cache_data.data()), state.file_size);
+                        state.current_block = 0;
+                        state.block_slider = 0;
+                        state.redrawBlock = true;
                     }
+                    state.showCacheGen = false;
                 }
                 if (ImGui::Button("Close")) {
                     state.showCacheGen = false;
@@ -442,10 +453,10 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                                                         config);
             }
         }
-        if (!state.originalFile.empty()) {
+        if (!state.showCacheGen && !state.originalFile.empty()) {
             ImGui::Text("Source: %s", state.originalFile.c_str());
         }
-        if (!state.lastCacheFile.empty()) {
+        if (!state.showCacheGen && !state.lastCacheFile.empty()) {
             ImGui::Text("Cache: %s", state.lastCacheFile.c_str());
         }
 
