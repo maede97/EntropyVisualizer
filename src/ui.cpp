@@ -110,7 +110,14 @@ void renderHexViewWindow(UiState &uiState, const AppState &appState) {
                          j < 16 && i + j < uiState.currentSectorData.size();
                          ++j) {
                         char c = uiState.currentSectorData[i + j];
-                        ImGui::Text("%c", (c >= 32 && c <= 126) ? c : '.');
+                        size_t offset = i + j;
+                        if (highlightMap.count(offset)) {
+                            ImGui::TextColored(
+                                ImColor(highlightMap[offset].first), "%c ",
+                                (c >= 32 && c <= 126) ? c : '.');
+                        } else {
+                            ImGui::Text("%c", (c >= 32 && c <= 126) ? c : '.');
+                        }
                         if (j < 15)
                             ImGui::SameLine();
                     }
