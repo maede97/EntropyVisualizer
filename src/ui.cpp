@@ -34,7 +34,7 @@ void renderAboutWindow(UiState &uiState) {
     if (uiState.showAboutUs) {
         ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("About", &uiState.showAboutUs)) {
-            ImGui::Text(ABOUT_STRING.c_str());
+            ImGui::Text(ABOUT_STRING.c_str(), "");
         }
         ImGui::End();
     }
@@ -44,7 +44,7 @@ void renderHelpWindow(UiState &uiState) {
     if (uiState.showHelp) {
         ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Help", &uiState.showHelp)) {
-            ImGui::Text(HELP_STRING.c_str());
+            ImGui::Text(HELP_STRING.c_str(), "");
         }
         ImGui::End();
     }
