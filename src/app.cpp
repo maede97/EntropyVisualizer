@@ -96,7 +96,7 @@ int parseCommandLine(int argc, char **argv, AppState &state) {
     return 0;
 }
 
-void handleDroppedFiles(AppState &state, UiState &uiState) {
+void handleDroppedFiles(AppState &state, UiState &uiState, std::function<void(size_t)> loadHexData) {
     if (!state.droppedFiles.empty()) {
         for (const auto &path : state.droppedFiles) {
             // Decide what to do based on extension
@@ -269,7 +269,7 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
         size_t block_size = state.block_width * state.block_height;
 
         // Handle dropped files
-        handleDroppedFiles(state, uiState);
+        handleDroppedFiles(state, uiState, loadHexData);
 
         // Handle keyboard shortcuts
         handleKeyboardShortcuts(state, uiState, config, window, loadHexData);
@@ -296,6 +296,9 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
             if (load_block_from_file(state.file, state.current_block, block_size, state.file_size,
                                      state.block_buffer)) {
                 upload_block(tex, state.block_buffer, state.block_width, state.block_height);
+                if (uiState.showHexView) {
+                    loadHexData(uiState.highlighted_sector);
+                }
             }
             state.redrawBlock = false;
         }
@@ -315,6 +318,7 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 }
                 ImGui::EndMenu();
             }
+
             if (ImGui::BeginMenu("Misc")) {
                 if (ImGui::MenuItem("About")) {
                     uiState.showAboutUs = true;
@@ -327,11 +331,11 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 }
                 ImGui::EndMenu();
             }
-            ImGui::EndMainMenuBar();
         }
+        ImGui::EndMainMenuBar();
 
         // File dialogs
-        handleFileDialogs(uiState, state, config);
+        handleFileDialogs(uiState, state, config, loadHexData);
 
         // Cache generation window
         if (state.showCacheGen) {

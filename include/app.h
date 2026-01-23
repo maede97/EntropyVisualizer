@@ -6,6 +6,7 @@
 #include <atomic>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <glad/glad.h>
 #include <string>
 #include <thread>
@@ -70,8 +71,8 @@ struct AppState {
 };
 
 int parseCommandLine(int argc, char **argv, AppState &state);
-void handleDroppedFiles(AppState &state, UiState &uiState);
-void handleKeyboardShortcuts(AppState &state, UiState &uiState);
+void handleDroppedFiles(AppState &state, UiState &uiState, std::function<void(size_t)> loadHexData);
+void handleKeyboardShortcuts(AppState &state, UiState &uiState, IGFD::FileDialogConfig &config, GLFWwindow *window, std::function<void(size_t)> loadHexData);
 void updateAutoplay(AppState &state);
 void initializeWindowAndGL(GLFWwindow *&window, GLuint &tex);
 void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState, IGFD::FileDialogConfig &config,

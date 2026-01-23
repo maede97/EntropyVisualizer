@@ -1,16 +1,16 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include <glad/glad.h>
-#include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <glad/glad.h>
+#include <imgui.h>
 #include <iostream>
 
-#include "core.h"
-#include "cache.h"
-#include "ui.h"
 #include "app.h"
+#include "cache.h"
+#include "core.h"
 #include "icon.h"
+#include "ui.h"
 #include "version.h"
 
 int main(int argc, char **argv) {

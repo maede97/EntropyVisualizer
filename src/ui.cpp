@@ -31,8 +31,8 @@ void renderAboutWindow(UiState &uiState) {
         ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("About", &uiState.showAboutUs)) {
             ImGui::Text(ABOUT_STRING.c_str());
-            ImGui::End();
         }
+        ImGui::End();
     }
 }
 
@@ -41,8 +41,8 @@ void renderHelpWindow(UiState &uiState) {
         ImGui::SetNextWindowSize(ImVec2(600, 600), ImGuiCond_FirstUseEver);
         if (ImGui::Begin("Help", &uiState.showHelp)) {
             ImGui::Text(HELP_STRING.c_str());
-            ImGui::End();
         }
+        ImGui::End();
     }
 }
 
@@ -52,6 +52,8 @@ void renderHexViewWindow(UiState &uiState) {
         if (ImGui::Begin("Hex View", &uiState.showHexView)) {
             ImGui::Text("Sector %zu (0x%zX)", uiState.currentSectorIndex, uiState.currentSectorIndex * 512);
             ImGui::Separator();
+
+            ImGui::Text("file %f", uiState.range_max);
 
             if (uiState.currentSectorData.empty()) {
                 ImGui::Text("No data available");
@@ -75,8 +77,8 @@ void renderHexViewWindow(UiState &uiState) {
                 }
                 ImGui::EndChild();
             }
-            ImGui::End();
         }
+        ImGui::End();
     }
 }
 
@@ -166,9 +168,8 @@ void renderSearchWindow(UiState &uiState, AppState &appState, std::function<void
                     loadHexData(found_index);
                 }
             }
-
-            ImGui::End();
         }
+        ImGui::End();
     }
 }
 
@@ -272,7 +273,8 @@ void renderVisualization(ImDrawList *draw_list, GLuint tex, const std::vector<ui
     }
 }
 
-void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogConfig &config) {
+void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogConfig &config,
+                       std::function<void(size_t)> loadHexData) {
     ImVec2 maxSize = ImVec2(1800, 1200);               // The full display area
     ImVec2 minSize = ImVec2(1800 / 2.0f, 1200 / 2.0f); // Half the display area
 
@@ -294,6 +296,7 @@ void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogCon
                 appState.redrawBlock = true;
                 appState.promptForSource = true; // Always prompt for source when opening cache
                 // Clear old hex view data
+                uiState.highlighted_sector = SIZE_MAX;
                 uiState.currentSectorData.clear();
                 uiState.currentSectorIndex = 0;
             }
@@ -331,6 +334,10 @@ void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogCon
                 if (expected_cache_size == appState.file_size) {
                     appState.originalFile = sourcePath;
                     appState.promptForSource = false;
+                    // Reload hex view if open
+                    if (uiState.showHexView) {
+                        loadHexData(uiState.currentSectorIndex);
+                    }
                 } else {
                     // Size mismatch, do not set
                 }
