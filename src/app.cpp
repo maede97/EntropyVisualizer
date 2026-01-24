@@ -248,8 +248,11 @@ void initializeWindowAndGL(GLFWwindow *&window, GLuint &tex) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
-    io.IniFilename = nullptr;
+    io.IniFilename = "entropy_visualizer.ini";
     io.LogFilename = nullptr;
+
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
     (void)io;
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -271,6 +274,8 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
         size_t block_size = state.block_width * state.block_height;
 
