@@ -6,10 +6,6 @@
 
 #include "imgui.h"
 
-#ifndef RGBA_COLOR
-#define RGBA_COLOR(R, G, B, A) (((unsigned int)(A) << 24) | ((unsigned int)(B) << 0) | ((unsigned int)(G) << 8) | ((unsigned int)(R) << 16))
-#endif
-
 namespace entropy {
 
 struct Highlight {

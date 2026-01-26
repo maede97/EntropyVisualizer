@@ -10,7 +10,7 @@ namespace entropy {
 
 class ZeroBytesFeature : public HexDisplayFeature {
   public:
-    ZeroBytesFeature() { color = RGBA_COLOR(255, 255, 255, 100); }
+    ZeroBytesFeature() { color = IM_COL32(255, 255, 255, 100); }
     std::string getName() const override { return "Zero Bytes Finder"; }
     std::string getSlug() const override { return "zeros"; }
     std::string getVersion() const override { return "1.0"; }
