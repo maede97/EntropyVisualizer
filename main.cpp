@@ -1,9 +1,13 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
+#include <cctype>
+#include <cstring>
 #include <glad/glad.h>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <iostream>
 
 #include <entropy/app.h>
@@ -12,6 +16,8 @@
 #include <entropy/icon.h>
 #include <entropy/ui.h>
 #include <entropy/version.h>
+
+entropy::AppState *globalAppState = nullptr;
 
 int main(int argc, char **argv) {
     entropy::AppState appState;
@@ -29,6 +35,8 @@ int main(int argc, char **argv) {
         appState.featureEnabled[feature->getName()] = true;
     }
 
+    globalAppState = &appState;
+
     GLFWwindow *window;
     GLuint tex;
     entropy::initializeWindowAndGL(window, tex);
@@ -37,6 +45,92 @@ int main(int argc, char **argv) {
         std::cerr << "Failed to create window\n";
         return 1;
     }
+
+    // Register ImGui settings handler for features
+    ImGuiSettingsHandler featuresHandler;
+    featuresHandler.TypeName = "HexDisplayFeatures";
+    featuresHandler.TypeHash = ImHashStr("HexDisplayFeatures");
+    featuresHandler.ReadOpenFn = [](ImGuiContext *, ImGuiSettingsHandler *, const char *name) -> void * {
+        if (strcmp(name, "Enabled") == 0)
+            // return string "Enabled" as a void* (which is later used to infer the section)
+            return (void *)"Enabled";
+
+        // check if name matches any feature slug
+        for (const auto *f : globalAppState->hexDisplayFeatureManager->getFeatures()) {
+            std::string slug = f->getSlug();
+            if (slug == name) {
+                return (void *)f;
+            }
+        }
+
+        return nullptr;
+    };
+    featuresHandler.ReadLineFn = [](ImGuiContext *, ImGuiSettingsHandler *, void *entry, const char *line) {
+        if (entry != (void *)"Enabled") {
+            auto *feature = static_cast<entropy::HexDisplayFeature *>(entry);
+            std::string line_str = line;
+            size_t eq_pos = line_str.find('=');
+            if (eq_pos != std::string::npos) {
+                std::string key = line_str.substr(0, eq_pos);
+                std::string value = line_str.substr(eq_pos + 1);
+
+                                feature->setConfig(key, value);
+            }
+
+            return;
+        }
+
+        std::string line_str = line;
+        size_t eq_pos = line_str.find('=');
+        if (eq_pos != std::string::npos) {
+            std::string slug = line_str.substr(0, eq_pos);
+            std::string value = line_str.substr(eq_pos + 1);
+
+            std::string featureName;
+            // Find feature by slug
+            for (const auto *f : globalAppState->hexDisplayFeatureManager->getFeatures()) {
+                std::string f_slug = f->getSlug();
+                if (f_slug == slug) {
+                    featureName = f->getName();
+                    break;
+                }
+            }
+            if (featureName.empty())
+                return; // Unknown feature
+
+            globalAppState->featureEnabled[featureName] = (value == "1");
+        }
+    };
+    featuresHandler.WriteAllFn = [](ImGuiContext *, ImGuiSettingsHandler *handler, ImGuiTextBuffer *buf) {
+        buf->appendf("[%s][Enabled]\n", handler->TypeName);
+        for (const auto &pair : globalAppState->featureEnabled) {
+            std::string name = pair.first;
+            std::replace(name.begin(), name.end(), ' ', '_');
+            buf->appendf("%s=%d\n", name.c_str(), pair.second ? 1 : 0);
+        }
+        buf->appendf("\n");
+
+        // config for each feature
+        for (const auto *f : globalAppState->hexDisplayFeatureManager->getFeatures()) {
+            std::string slug = f->getSlug();
+
+            buf->appendf("[%s][%s]\n", handler->TypeName, slug.c_str());
+
+            std::vector<std::string> configOptions = f->getConfigOptions();
+            for (const auto &key : configOptions) {
+                std::string value = f->getConfigValue(key);
+                buf->appendf("%s=%s\n", key.c_str(), value.c_str());
+            }
+
+            buf->appendf("\n");
+        }
+    };
+    // buf->appendf("color=0x%08X\n", f->color);
+
+    ImGui::AddSettingsHandler(&featuresHandler);
+
+    // Load settings
+    ImGui::LoadIniSettingsFromDisk(ImGui::GetIO().IniFilename);
 
     // Set up drop callback
     glfwSetWindowUserPointer(window, &appState.droppedFiles);

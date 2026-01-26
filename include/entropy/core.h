@@ -30,6 +30,7 @@ Navigation:
 - Prev/Next buttons: Navigate blocks
 - Autoplay: Automatically advance through blocks
 - Block Height/Width sliders: Adjust grid size (resets to block 0)
+- Press 'n' / 'p' keys: Next/Previous block
 
 Sector Selection and Movement:
 - Click a sector to select it and open hex view

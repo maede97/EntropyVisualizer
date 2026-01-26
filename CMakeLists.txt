@@ -45,7 +45,7 @@ target_link_libraries(cache PUBLIC core)
 
 # --- Hex Display Feature Manager library ---
 add_library(hex_display_feature_manager STATIC src/hex_display_feature_manager.cpp)
-target_include_directories(hex_display_feature_manager PUBLIC include)
+target_include_directories(hex_display_feature_manager PUBLIC include external/imgui)
 
 # --- UI library ---
 add_library(ui STATIC src/ui.cpp)
