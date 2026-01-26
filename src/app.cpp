@@ -202,6 +202,25 @@ void handleKeyboardShortcuts(AppState &state, UiState &uiState, IGFD::FileDialog
             loadHexData(uiState.highlighted_sector);
         }
     }
+
+    // n, p move to next/previous block
+    if (ImGui::IsKeyPressed(ImGuiKey_N)) {
+        size_t block_size = state.block_width * state.block_height;
+        size_t num_blocks = (state.file_size + block_size - 1) / block_size;
+        if (state.current_block + 1 < num_blocks) {
+            state.current_block++;
+            state.block_slider = (int)state.current_block;
+            state.redrawBlock = true;
+        }
+    }
+
+    if (ImGui::IsKeyPressed(ImGuiKey_P)) {
+        if (state.current_block > 0) {
+            state.current_block--;
+            state.block_slider = (int)state.current_block;
+            state.redrawBlock = true;
+        }
+    }
 }
 
 void updateAutoplay(AppState &state) {
