@@ -15,10 +15,6 @@ file(GLOB IMGUI_CORE_SRC
     external/imgui/*.cpp
 )
 
-list(REMOVE_ITEM IMGUI_CORE_SRC
-    external/imgui/imgui_demo.cpp
-)
-
 set(IMGUI_BACKEND_SRC
     external/imgui/backends/imgui_impl_glfw.cpp
     external/imgui/backends/imgui_impl_opengl3.cpp
