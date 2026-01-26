@@ -364,6 +364,9 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 for (const auto *feature : state.hexDisplayFeatureManager->getFeatures()) {
                     ImGui::MenuItem(feature->getName().c_str(), NULL, &state.featureEnabled.at(feature->getName()));
                 }
+                if (ImGui::MenuItem("Settings")) {
+                    uiState.showFeatureSettings = true;
+                }
                 ImGui::EndMenu();
             }
         }
@@ -487,6 +490,16 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
         renderHelpWindow(uiState);
         renderHexViewWindow(uiState, state);
         renderSearchWindow(uiState, state, loadHexData);
+
+        if (uiState.showFeatureSettings) {
+            ImGui::Begin("Feature Settings", &uiState.showFeatureSettings);
+            for (const auto *feature : state.hexDisplayFeatureManager->getFeatures()) {
+                ImGui::Text("%s", feature->getName().c_str());
+                feature->renderSettingsPanel();
+                ImGui::Separator();
+            }
+            ImGui::End();
+        }
 
         // Visualization
         ImDrawList *draw_list = ImGui::GetBackgroundDrawList();

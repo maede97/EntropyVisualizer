@@ -27,6 +27,7 @@ struct UiState {
     bool showAboutUs = false;
     bool showHelp = false;
     bool showSearchWindow = false;
+    bool showFeatureSettings = false;
     size_t highlighted_sector = SIZE_MAX;
     std::vector<uint8_t> currentSectorData;
     size_t currentSectorIndex = 0;
