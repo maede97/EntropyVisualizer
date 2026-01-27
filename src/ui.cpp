@@ -266,6 +266,13 @@ void renderVisualization(ImDrawList *draw_list, GLuint tex, const std::vector<ui
                 loadHexData(sector_index);
                 uiState.showHexView = true;
             }
+
+            if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !ImGui::GetIO().WantCaptureMouse) {
+                size_t sector_index = current_block * block_size + idx;
+                uiState.highlighted_sector = sector_index;
+                loadHexData(sector_index);
+                uiState.showHexView = true;
+            }
         }
     }
 

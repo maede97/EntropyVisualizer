@@ -6,6 +6,8 @@
 
 #include <entropy/hex_display_feature.h>
 
+#include <iostream>
+
 namespace entropy {
 
 class AEWFDetector : public HexDisplayFeature {
@@ -19,12 +21,32 @@ class AEWFDetector : public HexDisplayFeature {
 
     std::vector<Highlight> getHighlights(const std::vector<uint8_t> &sectorData, size_t sectorIndex) const override {
         std::vector<Highlight> highlights;
-        // Scan for a AEWF signature at sector start (0-3)
-        // Signature: EVF 0x09 	0x0d 	0x0a 	0xff 	0x00
-        if (sectorData.size() >= 13 && sectorData[0] == 0x45 && sectorData[1] == 0x56 && sectorData[2] == 0x46 && sectorData[3] == 0x09 &&
-            sectorData[4] == 0x0d && sectorData[5] == 0x0a && sectorData[6] == 0xff && sectorData[7] == 0x00) {
-            for (size_t i = 0; i < 8; i++) {
-                highlights.push_back({i, this->color});
+
+        // .E01 file
+        // Signature: EVF 0x09 0x0d 0x0a 0xff 0x00
+        const char aewf_signature[] = {'E', 'V', 'F', 0x09, 0x0d, 0x0a, (char)0xff, 0x00};
+
+        // check if sectorData contains the signature
+        for (size_t i = 0; i + sizeof(aewf_signature) <= sectorData.size(); i++) {
+            if (memcmp(&sectorData[i], aewf_signature, sizeof(aewf_signature)) == 0) {
+                for (size_t j = 0; j < sizeof(aewf_signature); j++) {
+                    highlights.push_back({i + j, this->color});
+                }
+                return highlights;
+            }
+        }
+
+        // .AD1 file
+        // Signature: ADSEGMENTEDFILE\0
+        const char ad1_signature[] = {'A', 'D', 'S', 'E', 'G', 'M', 'E', 'N', 'T', 'E', 'D', 'F', 'I', 'L', 'E', 0x00};
+
+        for (size_t i = 0; i + sizeof(ad1_signature) <= sectorData.size(); i++) {
+            if (memcmp(&sectorData[i], ad1_signature, sizeof(ad1_signature)) == 0) {
+                // Found AD1 signature
+                for (size_t j = 0; j < sizeof(ad1_signature); j++) {
+                    highlights.push_back({i + j, this->color});
+                }
+                return highlights;
             }
         }
 
