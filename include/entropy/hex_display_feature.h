@@ -1,14 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
 
 #include "imgui.h"
-
-#ifndef RGBA_COLOR
-#define RGBA_COLOR(R, G, B, A) (((unsigned int)(A) << 24) | ((unsigned int)(B) << 0) | ((unsigned int)(G) << 8) | ((unsigned int)(R) << 16))
-#endif
 
 namespace entropy {
 
@@ -32,6 +29,7 @@ class HexDisplayFeature {
         ImGui::PushID(getName().c_str());
         if (ImGui::ColorEdit4("Color", (float *)&col)) {
             color = ImGui::ColorConvertFloat4ToU32(col);
+            highlightCache.clear();
         }
         ImGui::PopID();
     }
@@ -40,6 +38,7 @@ class HexDisplayFeature {
             unsigned int color_value = 0;
             if (sscanf(value.c_str(), "0x%X", &color_value) == 1) {
                 color = color_value;
+                highlightCache.clear();
             }
         }
     }
@@ -57,6 +56,7 @@ class HexDisplayFeature {
 
   public:
     mutable uint32_t color = IM_COL32(255, 0, 0, 255); // Default red color
+    mutable std::map<size_t, std::vector<Highlight>> highlightCache;
 };
 
 } // namespace entropy

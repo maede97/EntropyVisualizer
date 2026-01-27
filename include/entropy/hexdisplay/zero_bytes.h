@@ -10,7 +10,7 @@ namespace entropy {
 
 class ZeroBytesFeature : public HexDisplayFeature {
   public:
-    ZeroBytesFeature() { color = RGBA_COLOR(255, 255, 255, 100); }
+    ZeroBytesFeature() { color = IM_COL32(255, 255, 255, 100); }
     std::string getName() const override { return "Zero Bytes Finder"; }
     std::string getSlug() const override { return "zeros"; }
     std::string getVersion() const override { return "1.0"; }
@@ -37,7 +37,10 @@ class ZeroBytesFeature : public HexDisplayFeature {
         // Default Config (color)
         HexDisplayFeature::renderSettingsPanel();
 
-        ImGui::Checkbox("Color FF as well", &colorFF);
+        bool changed = ImGui::Checkbox("Color FF as well", &colorFF);
+        if (changed) {
+            highlightCache.clear();
+        }
 
         ImGui::PopID();
     }
@@ -59,6 +62,7 @@ class ZeroBytesFeature : public HexDisplayFeature {
     void setConfig(const std::string &key, const std::string &value) override {
         if (key == "colorFF") {
             colorFF = (value == "1");
+            highlightCache.clear();
             return;
         }
         // default options

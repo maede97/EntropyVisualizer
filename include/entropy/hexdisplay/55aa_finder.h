@@ -10,7 +10,7 @@ namespace entropy {
 
 class AA55FinderFeature : public HexDisplayFeature {
   public:
-    AA55FinderFeature() { color = RGBA_COLOR(255, 255, 0, 255); }
+    AA55FinderFeature() { color = IM_COL32(255, 255, 0, 255); }
     std::string getName() const override { return "55AA Finder"; }
     std::string getSlug() const override { return "55aa"; }
     std::string getVersion() const override { return "1.0"; }
