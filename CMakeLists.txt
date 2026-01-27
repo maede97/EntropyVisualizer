@@ -32,7 +32,12 @@ target_include_directories(glad PUBLIC external/glad/include)
 # --- ImGuiFileDialog ---
 add_library(imguifiledialog STATIC external/ImGuiFileDialog/ImGuiFileDialog.cpp)
 target_include_directories(imguifiledialog PUBLIC external/ImGuiFileDialog external/imgui)
-target_link_libraries(imgui PUBLIC imguifiledialog)
+target_link_libraries(imguifiledialog PUBLIC imgui)
+
+# --- ImGui_Gradient ---
+add_subdirectory(external/imgui_gradient)
+target_include_directories(imgui_gradient SYSTEM PRIVATE external/imgui)
+target_compile_definitions(imgui_gradient PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
 
 # --- Core library ---
 add_library(core STATIC src/core.cpp)
@@ -49,8 +54,8 @@ target_include_directories(hex_display_feature_manager PUBLIC include external/i
 
 # --- UI library ---
 add_library(ui STATIC src/ui.cpp)
-target_include_directories(ui PUBLIC include external/imgui external/ImGuiFileDialog)
-target_link_libraries(ui PUBLIC core imgui glad glfw imguifiledialog)
+target_include_directories(ui PUBLIC include external/imgui external/ImGuiFileDialog external/imgui_gradient)
+target_link_libraries(ui PUBLIC core imgui glad glfw imguifiledialog imgui_gradient)
 
 # --- App library ---
 add_library(app STATIC src/app.cpp)

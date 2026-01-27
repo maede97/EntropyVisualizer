@@ -10,6 +10,17 @@ namespace entropy {
 
 #define ALL_FILES_FILTER "All files {((.*))}"
 
+void AppState::resetHexDisplayGradientColors() {
+    gradient_widget.gradient().clear();
+    gradient_widget.gradient().add_mark(ImGG::Mark{ImGG::RelativePosition{0.0f}, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)});
+    gradient_widget.gradient().add_mark(ImGG::Mark{ImGG::RelativePosition{0.25f}, ImVec4(0.0f, 1.0f, 1.0f, 1.0f)});
+    gradient_widget.gradient().add_mark(ImGG::Mark{ImGG::RelativePosition{0.5f}, ImVec4(0.0f, 1.0f, 0.0f, 1.0f)});
+    gradient_widget.gradient().add_mark(ImGG::Mark{ImGG::RelativePosition{0.75f}, ImVec4(1.0f, 1.0f, 0.0f, 1.0f)});
+    gradient_widget.gradient().add_mark(ImGG::Mark{ImGG::RelativePosition{1.0f}, ImVec4(1.0f, 0.0f, 0.0f, 1.0f)});
+
+    gradient_widget.gradient().interpolation_mode() = ImGG::Interpolation::Linear;
+}
+
 int parseCommandLine(int argc, char **argv, AppState &state) {
     state.originalFile = ""; // Reset
     if (argc == 3) {
@@ -324,11 +335,11 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
 
         if (state.redrawBlock) {
             if (load_block_from_file(state.file, state.current_block, block_size, state.file_size, state.block_buffer)) {
-                upload_block(tex, state.block_buffer, state.block_width, state.block_height);
+                upload_block(tex, state.block_buffer, state.block_width, state.block_height, state);
             } else {
                 // Clear visualization if load fails
                 state.block_buffer.assign(0, 0);
-                upload_block(tex, state.block_buffer, state.block_width, state.block_height);
+                upload_block(tex, state.block_buffer, state.block_width, state.block_height, state);
             }
             state.redrawBlock = false;
         }
@@ -360,13 +371,22 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 }
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu("Hex Display Features")) {
-                for (const auto *feature : state.hexDisplayFeatureManager->getFeatures()) {
-                    ImGui::MenuItem(feature->getName().c_str(), NULL, &state.featureEnabled.at(feature->getName()));
+            if (ImGui::BeginMenu("Settings")) {
+                if (ImGui::BeginMenu("Enabled Features")) {
+                    for (const auto *feature : state.hexDisplayFeatureManager->getFeatures()) {
+                        ImGui::MenuItem(feature->getName().c_str(), NULL, &state.featureEnabled.at(feature->getName()));
+                    }
+                    ImGui::EndMenu();
                 }
-                if (ImGui::MenuItem("Settings")) {
+
+                if (ImGui::MenuItem("Feature Settings")) {
                     uiState.showFeatureSettings = true;
                 }
+
+                if (ImGui::MenuItem("General Settings")) {
+                    uiState.showGeneralSettings = true;
+                }
+
                 ImGui::EndMenu();
             }
         }
@@ -459,6 +479,8 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
             }
             if (ImGui::Button("Clear Highlight")) {
                 uiState.highlighted_sector = SIZE_MAX;
+                uiState.currentSectorData.clear();
+                uiState.currentSectorIndex = 0;
             }
         }
 
@@ -497,6 +519,25 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 ImGui::Text("%s", feature->getName().c_str());
                 feature->renderSettingsPanel();
                 ImGui::Separator();
+            }
+            ImGui::End();
+        }
+
+        if (uiState.showGeneralSettings) {
+            ImGui::Begin("General Settings", &uiState.showGeneralSettings);
+
+            ImGG::Settings settings;
+            settings.flags = ImGG::Flag::NoResetButton;
+            settings.gradient_width = 5000; // arbitrary large to use full width
+            if (state.gradient_widget.widget("Hex Color Gradient", settings)) {
+                state.redrawBlock = true;
+            }
+            if (ImGG::interpolation_mode_widget("Interpolation Mode", &state.gradient_widget.gradient().interpolation_mode())) {
+                state.redrawBlock = true;
+            }
+            if (ImGui::Button("Reset Gradient to Default")) {
+                state.resetHexDisplayGradientColors();
+                state.redrawBlock = true;
             }
             ImGui::End();
         }

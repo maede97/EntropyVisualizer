@@ -1,3 +1,5 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+
 #include <entropy/app.h>
 #include <entropy/cache.h>
 #include <entropy/core.h>
@@ -6,22 +8,21 @@
 #include <GL/gl.h>
 #include <algorithm>
 #include <map>
-
 namespace entropy {
 
 // Upload one block into the active OpenGL texture
-void upload_block(GLuint tex, const std::vector<uint8_t> &raw, size_t block_width, size_t block_height) {
+void upload_block(GLuint tex, const std::vector<uint8_t> &raw, size_t block_width, size_t block_height, const AppState &appState) {
     std::vector<uint8_t> tex_data(block_width * block_height * 4, 0);
 
     for (size_t i = 0; i < raw.size(); i++) {
         float e = unpack_value(raw[i]) / 8.0f;
-        uint8_t r, g, b;
-        value_to_color(e, r, g, b);
 
-        tex_data[i * 4 + 0] = r;
-        tex_data[i * 4 + 1] = g;
-        tex_data[i * 4 + 2] = b;
-        tex_data[i * 4 + 3] = 255;
+        ImVec4 color = appState.gradient_widget.gradient().at(ImGG::RelativePosition{e});
+
+        tex_data[i * 4 + 0] = color.x * 255;
+        tex_data[i * 4 + 1] = color.y * 255;
+        tex_data[i * 4 + 2] = color.z * 255;
+        tex_data[i * 4 + 3] = color.w * 255;
     }
 
     glBindTexture(GL_TEXTURE_2D, tex);

@@ -7,3 +7,7 @@
 [submodule "external/ImGuiFileDialog"]
 	path = external/ImGuiFileDialog
 	url = https://github.com/aiekick/ImGuiFileDialog
+
+[submodule "external/imgui_gradient"]
+	path = external/imgui_gradient
+	url = https://github.com/maede97/imgui_gradient
