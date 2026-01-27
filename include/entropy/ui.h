@@ -1,5 +1,7 @@
 #pragma once
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+
 #include <atomic>
 #include <functional>
 #include <string>
@@ -26,6 +28,6 @@ void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogCon
 void renderVisualization(ImDrawList *draw_list, GLuint tex, const std::vector<uint8_t> &block_buffer, float zoom, ImVec2 pan_offset,
                          size_t current_block, size_t block_size, size_t block_width, size_t block_height, UiState &uiState,
                          std::function<void(size_t)> loadHexData);
-void upload_block(GLuint tex, const std::vector<uint8_t> &raw, size_t block_width, size_t block_height);
+void upload_block(GLuint tex, const std::vector<uint8_t> &raw, size_t block_width, size_t block_height, const AppState &appState);
 
 } // namespace entropy

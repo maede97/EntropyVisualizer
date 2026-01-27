@@ -1,12 +1,15 @@
 #pragma once
+#define IMGUI_DEFINE_MATH_OPERATORS
+
+#include <entropy/core.h>
+#include <entropy/hex_display_feature_manager.h>
 #include <entropy/ui.h>
 
 #include <atomic>
-#include <entropy/core.h>
-#include <entropy/hex_display_feature_manager.h>
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <imgui_gradient/imgui_gradient.hpp>
 #include <map>
 #include <memory>
 #include <string>
@@ -28,6 +31,7 @@ struct UiState {
     bool showHelp = false;
     bool showSearchWindow = false;
     bool showFeatureSettings = false;
+    bool showGeneralSettings = false;
     size_t highlighted_sector = SIZE_MAX;
     std::vector<uint8_t> currentSectorData;
     size_t currentSectorIndex = 0;
@@ -74,6 +78,9 @@ struct AppState {
     // Hex Display Features
     std::unique_ptr<HexDisplayFeatureManager> hexDisplayFeatureManager;
     std::map<std::string, bool> featureEnabled;
+    ImGG::GradientWidget gradient_widget;
+
+    void resetHexDisplayGradientColors();
 };
 
 int parseCommandLine(int argc, char **argv, AppState &state);

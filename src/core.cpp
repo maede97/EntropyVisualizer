@@ -35,29 +35,4 @@ double shannon_entropy(const unsigned char *data, size_t size) {
     return entropy;
 }
 
-// Map 0-1 value to color (blue -> green -> yellow -> red)
-void value_to_color(float v, uint8_t &r, uint8_t &g, uint8_t &b) {
-    if (v < 0.25f) {
-        float t = v / 0.25f;
-        r = 0;
-        g = uint8_t(t * 255);
-        b = 255;
-    } else if (v < 0.5f) {
-        float t = (v - 0.25f) / 0.25f;
-        r = 0;
-        g = 255;
-        b = uint8_t((1.0f - t) * 255);
-    } else if (v < 0.75f) {
-        float t = (v - 0.5f) / 0.25f;
-        r = uint8_t(t * 255);
-        g = 255;
-        b = 0;
-    } else {
-        float t = (v - 0.75f) / 0.25f;
-        r = 255;
-        g = uint8_t((1.0f - t) * 255);
-        b = 0;
-    }
-}
-
 } // namespace entropy

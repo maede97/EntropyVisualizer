@@ -1,3 +1,5 @@
+#define IMGUI_DEFINE_MATH_OPERATORS
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -55,6 +57,9 @@ int main(int argc, char **argv) {
             // return string "Enabled" as a void* (which is later used to infer the section)
             return (void *)"Enabled";
 
+        if (strcmp(name, "Gradient") == 0)
+            return (void *)"Gradient";
+
         // check if name matches any feature slug
         for (const auto *f : globalAppState->hexDisplayFeatureManager->getFeatures()) {
             std::string slug = f->getSlug();
@@ -66,39 +71,83 @@ int main(int argc, char **argv) {
         return nullptr;
     };
     featuresHandler.ReadLineFn = [](ImGuiContext *, ImGuiSettingsHandler *, void *entry, const char *line) {
-        if (entry != (void *)"Enabled") {
-            auto *feature = static_cast<entropy::HexDisplayFeature *>(entry);
+        if (entry == (void *)"Enabled") {
+            std::string line_str = line;
+            size_t eq_pos = line_str.find('=');
+            if (eq_pos != std::string::npos) {
+                std::string slug = line_str.substr(0, eq_pos);
+                std::string value = line_str.substr(eq_pos + 1);
+
+                std::string featureName;
+                // Find feature by slug
+                for (const auto *f : globalAppState->hexDisplayFeatureManager->getFeatures()) {
+                    std::string f_slug = f->getSlug();
+                    if (f_slug == slug) {
+                        featureName = f->getName();
+                        break;
+                    }
+                }
+                if (featureName.empty())
+                    return; // Unknown feature
+
+                globalAppState->featureEnabled[featureName] = (value == "1");
+            }
+        }
+
+        if (entry == (void *)"Gradient") {
             std::string line_str = line;
             size_t eq_pos = line_str.find('=');
             if (eq_pos != std::string::npos) {
                 std::string key = line_str.substr(0, eq_pos);
                 std::string value = line_str.substr(eq_pos + 1);
 
-                                feature->setConfig(key, value);
-            }
+                if (key == "marks") {
+                    // Parse marks
+                    std::list<ImGG::Mark> marks;
+                    size_t start = 0;
+                    while (start < value.length()) {
+                        size_t comma_pos = value.find(',', start);
+                        std::string mark_str = (comma_pos == std::string::npos) ? value.substr(start) : value.substr(start, comma_pos - start);
 
-            return;
+                        size_t colon_pos = mark_str.find(':');
+                        if (colon_pos != std::string::npos) {
+                            float pos = std::stof(mark_str.substr(0, colon_pos));
+                            std::string color_str = mark_str.substr(colon_pos + 1);
+                            unsigned int color_value = 0;
+                            if (sscanf(color_str.c_str(), "0x%X", &color_value) == 1) {
+                                ImGG::Mark mark;
+                                mark.position = ImGG::RelativePosition{pos};
+                                mark.color = ImColor(color_value);
+                                marks.push_back(mark);
+                            }
+                        }
+
+                        if (comma_pos == std::string::npos)
+                            break;
+                        start = comma_pos + 1;
+                    }
+
+                    globalAppState->gradient_widget.gradient() = ImGG::Gradient{marks};
+                }
+
+                if (key == "interpolation") {
+                    int mode = std::stoi(value);
+                    globalAppState->gradient_widget.gradient().interpolation_mode() = static_cast<ImGG::Interpolation>(mode);
+                }
+
+                return;
+            }
         }
 
+        // Settings for each hex display feature
+        auto *feature = static_cast<entropy::HexDisplayFeature *>(entry);
         std::string line_str = line;
         size_t eq_pos = line_str.find('=');
         if (eq_pos != std::string::npos) {
-            std::string slug = line_str.substr(0, eq_pos);
+            std::string key = line_str.substr(0, eq_pos);
             std::string value = line_str.substr(eq_pos + 1);
 
-            std::string featureName;
-            // Find feature by slug
-            for (const auto *f : globalAppState->hexDisplayFeatureManager->getFeatures()) {
-                std::string f_slug = f->getSlug();
-                if (f_slug == slug) {
-                    featureName = f->getName();
-                    break;
-                }
-            }
-            if (featureName.empty())
-                return; // Unknown feature
-
-            globalAppState->featureEnabled[featureName] = (value == "1");
+            feature->setConfig(key, value);
         }
     };
     featuresHandler.WriteAllFn = [](ImGuiContext *, ImGuiSettingsHandler *handler, ImGuiTextBuffer *buf) {
@@ -108,6 +157,23 @@ int main(int argc, char **argv) {
             std::replace(name.begin(), name.end(), ' ', '_');
             buf->appendf("%s=%d\n", name.c_str(), pair.second ? 1 : 0);
         }
+        buf->appendf("\n");
+
+        // Gradient settings
+        buf->appendf("[%s][Gradient]\n", handler->TypeName);
+        const auto &gradient = globalAppState->gradient_widget.gradient();
+        buf->appendf("marks=");
+        bool first = true;
+        for (const auto &mark : gradient.get_marks()) {
+            if (!first) {
+                buf->appendf(",");
+            }
+            first = false;
+            unsigned int color_value = ImGui::ColorConvertFloat4ToU32(mark.color);
+            buf->appendf("%.6f:0x%08X", mark.position.get(), color_value);
+        }
+        buf->appendf("\n");
+        buf->appendf("interpolation=%d\n", static_cast<int>(gradient.interpolation_mode()));
         buf->appendf("\n");
 
         // config for each feature
@@ -128,6 +194,8 @@ int main(int argc, char **argv) {
     // buf->appendf("color=0x%08X\n", f->color);
 
     ImGui::AddSettingsHandler(&featuresHandler);
+
+    appState.resetHexDisplayGradientColors();
 
     // Load settings
     ImGui::LoadIniSettingsFromDisk(ImGui::GetIO().IniFilename);

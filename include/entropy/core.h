@@ -54,6 +54,5 @@ double unpack_value(uint8_t packed);
 uint8_t pack_value(double value);
 template <typename T> T clip(const T &n, const T &lower, const T &upper) { return std::max(lower, std::min(n, upper)); }
 double shannon_entropy(const unsigned char *data, size_t size);
-void value_to_color(float v, uint8_t &r, uint8_t &g, uint8_t &b);
 
 } // namespace entropy
