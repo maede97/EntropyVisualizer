@@ -459,6 +459,8 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
             }
             if (ImGui::Button("Clear Highlight")) {
                 uiState.highlighted_sector = SIZE_MAX;
+                uiState.currentSectorData.clear();
+                uiState.currentSectorIndex = 0;
             }
         }
 
