@@ -37,7 +37,10 @@ class ZeroBytesFeature : public HexDisplayFeature {
         // Default Config (color)
         HexDisplayFeature::renderSettingsPanel();
 
-        ImGui::Checkbox("Color FF as well", &colorFF);
+        bool changed = ImGui::Checkbox("Color FF as well", &colorFF);
+        if (changed) {
+            highlightCache.clear();
+        }
 
         ImGui::PopID();
     }
@@ -59,6 +62,7 @@ class ZeroBytesFeature : public HexDisplayFeature {
     void setConfig(const std::string &key, const std::string &value) override {
         if (key == "colorFF") {
             colorFF = (value == "1");
+            highlightCache.clear();
             return;
         }
         // default options

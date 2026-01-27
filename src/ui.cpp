@@ -58,12 +58,29 @@ void renderHexViewWindow(UiState &uiState, const AppState &appState) {
             if (uiState.currentSectorData.empty()) {
                 ImGui::Text("No data available");
             } else {
+                // Clear highlight cache if sector changed
+                static size_t lastSectorIndex = SIZE_MAX;
+                if (lastSectorIndex != uiState.currentSectorIndex) {
+                    if (appState.hexDisplayFeatureManager) {
+                        for (auto *feature : appState.hexDisplayFeatureManager->getFeatures()) {
+                            feature->highlightCache.clear();
+                        }
+                    }
+                    lastSectorIndex = uiState.currentSectorIndex;
+                }
+
                 // Collect highlights from plugins
                 std::map<size_t, std::pair<uint32_t, int>> highlightMap; // color, priority
                 if (appState.hexDisplayFeatureManager) {
                     for (const auto *feature : appState.hexDisplayFeatureManager->getFeatures()) {
                         if (appState.featureEnabled.count(feature->getName()) && appState.featureEnabled.at(feature->getName())) {
-                            auto highlights = feature->getHighlights(uiState.currentSectorData, uiState.currentSectorIndex);
+                            std::vector<Highlight> highlights;
+                            if (feature->highlightCache.count(uiState.currentSectorIndex)) {
+                                highlights = feature->highlightCache[uiState.currentSectorIndex];
+                            } else {
+                                highlights = feature->getHighlights(uiState.currentSectorData, uiState.currentSectorIndex);
+                                feature->highlightCache[uiState.currentSectorIndex] = highlights;
+                            }
                             int priority = feature->getPriority();
                             for (const auto &h : highlights) {
                                 auto it = highlightMap.find(h.offset);

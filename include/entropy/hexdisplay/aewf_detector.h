@@ -6,8 +6,6 @@
 
 #include <entropy/hex_display_feature.h>
 
-#include <iostream>
-
 namespace entropy {
 
 class AEWFDetector : public HexDisplayFeature {
