@@ -107,8 +107,17 @@ void renderHexViewWindow(UiState &uiState, const AppState &appState) {
                         }
                         ImGui::SameLine();
                     }
-                    ImGui::Text(" | ");
+
+                    size_t bytesInRow = std::min<size_t>(16, uiState.currentSectorData.size() - i);
+
+                    for (size_t j = bytesInRow; j < 16; ++j) {
+                        ImGui::Text("   "); // 2 hex chars + space
+                        ImGui::SameLine();
+                    }
+
+                    ImGui::Text("| ");
                     ImGui::SameLine();
+
                     for (size_t j = 0; j < 16 && i + j < uiState.currentSectorData.size(); ++j) {
                         char c = uiState.currentSectorData[i + j];
                         size_t offset = i + j;
