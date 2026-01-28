@@ -8,6 +8,7 @@
 #include <GL/gl.h>
 #include <algorithm>
 #include <map>
+
 namespace entropy {
 
 // Upload one block into the active OpenGL texture
@@ -106,8 +107,17 @@ void renderHexViewWindow(UiState &uiState, const AppState &appState) {
                         }
                         ImGui::SameLine();
                     }
-                    ImGui::Text(" | ");
+
+                    size_t bytesInRow = std::min<size_t>(16, uiState.currentSectorData.size() - i);
+
+                    for (size_t j = bytesInRow; j < 16; ++j) {
+                        ImGui::Text("   "); // 2 hex chars + space
+                        ImGui::SameLine();
+                    }
+
+                    ImGui::Text("| ");
                     ImGui::SameLine();
+
                     for (size_t j = 0; j < 16 && i + j < uiState.currentSectorData.size(); ++j) {
                         char c = uiState.currentSectorData[i + j];
                         size_t offset = i + j;
@@ -146,62 +156,40 @@ void renderSearchWindow(UiState &uiState, AppState &appState, std::function<void
             if (ImGui::Button("Find")) {
                 size_t found_index = SIZE_MAX;
                 size_t start = (uiState.highlighted_sector == SIZE_MAX ? 0 : uiState.highlighted_sector + 1);
-                if (uiState.search_type == 0) {
-                    // max entropy (at most)
-                    for (size_t i = start; i < appState.all_cache_data.size(); ++i) {
-                        double e = unpack_value(appState.all_cache_data[i]);
-                        if (e <= uiState.max_value) {
-                            found_index = i;
-                            break;
-                        }
-                    }
-                    if (found_index == SIZE_MAX && start > 0) {
-                        for (size_t i = 0; i < start; ++i) {
-                            double e = unpack_value(appState.all_cache_data[i]);
-                            if (e <= uiState.max_value) {
-                                found_index = i;
-                                break;
-                            }
-                        }
-                    }
-                } else if (uiState.search_type == 1) {
-                    // min entropy (at least)
-                    for (size_t i = start; i < appState.all_cache_data.size(); ++i) {
-                        double e = unpack_value(appState.all_cache_data[i]);
-                        if (e >= uiState.min_value) {
-                            found_index = i;
-                            break;
-                        }
-                    }
-                    if (found_index == SIZE_MAX && start > 0) {
-                        for (size_t i = 0; i < start; ++i) {
-                            double e = unpack_value(appState.all_cache_data[i]);
-                            if (e >= uiState.min_value) {
-                                found_index = i;
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    // range
-                    for (size_t i = start; i < appState.all_cache_data.size(); ++i) {
-                        double e = unpack_value(appState.all_cache_data[i]);
-                        if (e >= uiState.range_min && e <= uiState.range_max) {
-                            found_index = i;
-                            break;
-                        }
-                    }
-                    if (found_index == SIZE_MAX && start > 0) {
-                        for (size_t i = 0; i < start; ++i) {
-                            double e = unpack_value(appState.all_cache_data[i]);
-                            if (e >= uiState.range_min && e <= uiState.range_max) {
-                                found_index = i;
-                                break;
-                            }
-                        }
+                for (size_t i = start; i < appState.all_cache_data.size(); ++i) {
+                    double e = unpack_value(appState.all_cache_data[i]);
+
+                    if ((uiState.search_type == 0 && e <= uiState.max_value) || (uiState.search_type == 1 && e >= uiState.min_value) ||
+                        (uiState.search_type == 2 && e >= uiState.range_min && e <= uiState.range_max)) {
+                        found_index = i;
+                        break;
                     }
                 }
 
+                if (found_index != SIZE_MAX) {
+                    uiState.highlighted_sector = found_index;
+                    size_t block_size = appState.block_width * appState.block_height;
+                    appState.current_block = found_index / block_size;
+                    appState.block_slider = appState.current_block;
+                    appState.redrawBlock = true;
+
+                    loadHexData(found_index);
+                }
+            }
+
+            if (ImGui::Button("Find Previous")) {
+                size_t found_index = SIZE_MAX;
+                size_t start = (uiState.highlighted_sector == SIZE_MAX ? appState.all_cache_data.size() : uiState.highlighted_sector);
+
+                for (size_t i = start; i-- > 0;) {
+                    double e = unpack_value(appState.all_cache_data[i]);
+
+                    if ((uiState.search_type == 0 && e <= uiState.max_value) || (uiState.search_type == 1 && e >= uiState.min_value) ||
+                        (uiState.search_type == 2 && e >= uiState.range_min && e <= uiState.range_max)) {
+                        found_index = i;
+                        break;
+                    }
+                }
                 if (found_index != SIZE_MAX) {
                     uiState.highlighted_sector = found_index;
                     size_t block_size = appState.block_width * appState.block_height;
