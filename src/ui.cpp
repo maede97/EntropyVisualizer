@@ -177,6 +177,8 @@ void renderSearchWindow(UiState &uiState, AppState &appState, std::function<void
                 }
             }
 
+            ImGui::SameLine();
+
             if (ImGui::Button("Find Previous")) {
                 size_t found_index = SIZE_MAX;
                 size_t start = (uiState.highlighted_sector == SIZE_MAX ? appState.all_cache_data.size() : uiState.highlighted_sector);
