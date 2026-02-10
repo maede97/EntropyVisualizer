@@ -334,6 +334,8 @@ void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogCon
                 uiState.highlighted_sector = SIZE_MAX;
                 uiState.currentSectorData.clear();
                 uiState.currentSectorIndex = 0;
+                // Add to recent files
+                addToRecentFiles(appState, filePathName, "");
             }
         }
         ImGuiFileDialog::Instance()->Close();
@@ -352,6 +354,8 @@ void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogCon
             appState.originalFile = fileToCache;
             appState.cacheThread = std::thread([fileToCache, cacheFile]() { generateCacheThreaded(fileToCache, cacheFile); });
             appState.cacheThread.detach();
+
+            addToRecentFiles(appState, cacheFile, fileToCache);
         }
         ImGuiFileDialog::Instance()->Close();
     }
@@ -372,6 +376,9 @@ void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogCon
                     if (uiState.showHexView) {
                         loadHexData(uiState.currentSectorIndex);
                     }
+
+                    addToRecentFiles(appState, appState.lastCacheFile, sourcePath);
+
                 } else {
                     // Size mismatch, do not set
                 }

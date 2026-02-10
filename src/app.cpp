@@ -10,6 +10,27 @@ namespace entropy {
 
 #define ALL_FILES_FILTER "All files {((.*))}"
 
+void addToRecentFiles(AppState &state, const std::string &cache_file, const std::string &file_path) {
+    const std::string cache_ext = ".cache.bin";
+    if (cache_file.size() < cache_ext.size() || cache_file.substr(cache_file.size() - cache_ext.size()) != cache_ext) {
+        return;
+    }
+
+    auto pair = std::make_pair(cache_file, file_path);
+
+    // Remove if already exists (to move to front)
+    auto it = std::find(state.recentCacheFiles.begin(), state.recentCacheFiles.end(), pair);
+    if (it != state.recentCacheFiles.end()) {
+        state.recentCacheFiles.erase(it);
+    }
+    // Add to front
+    state.recentCacheFiles.insert(state.recentCacheFiles.begin(), pair);
+    // Keep only 10 most recent
+    if (state.recentCacheFiles.size() > 10) {
+        state.recentCacheFiles.pop_back();
+    }
+}
+
 void AppState::resetHexDisplayGradientColors() {
     gradient_widget.gradient().clear();
     gradient_widget.gradient().add_mark(ImGG::Mark{ImGG::RelativePosition{0.0f}, ImVec4(0.0f, 0.0f, 1.0f, 1.0f)});
@@ -50,6 +71,8 @@ int parseCommandLine(int argc, char **argv, AppState &state) {
             state.file.read(reinterpret_cast<char *>(state.all_cache_data.data()), state.file_size);
 
             state.redrawBlock = true;
+
+            addToRecentFiles(state, cache_path, source_path);
         } else {
             std::cerr << "First argument must be a .cache.bin file when "
                          "providing two arguments.\n";
@@ -82,6 +105,8 @@ int parseCommandLine(int argc, char **argv, AppState &state) {
 
             state.redrawBlock = true;
             state.promptForSource = true;
+
+            addToRecentFiles(state, state.lastCacheFile, "");
         } else {
             // Start cache generation for the provided source file (background
             // thread)
@@ -98,6 +123,8 @@ int parseCommandLine(int argc, char **argv, AppState &state) {
 
             state.cacheThread = std::thread([arg_path, cache_file]() { generateCacheThreaded(arg_path, cache_file); });
             state.cacheThread.detach();
+
+            addToRecentFiles(state, cache_file, arg_path);
         }
     }
     return 0;
@@ -123,8 +150,11 @@ void handleDroppedFiles(AppState &state, UiState &uiState, std::function<void(si
                     state.current_block = 0;
                     state.block_slider = 0;
                     state.redrawBlock = true;
-                    if (state.originalFile.empty())
+                    if (state.originalFile.empty()) {
                         state.promptForSource = true;
+                    }
+                    loadHexData(0);
+                    addToRecentFiles(state, path, "");
                 }
             } else {
                 state.showCacheGen = true;
@@ -153,6 +183,8 @@ void handleDroppedFiles(AppState &state, UiState &uiState, std::function<void(si
                 uiState.highlighted_sector = SIZE_MAX;
                 uiState.currentSectorData.clear();
                 uiState.currentSectorIndex = 0;
+
+                addToRecentFiles(state, cacheFile, path);
             }
         }
 
@@ -353,8 +385,44 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 if (ImGui::MenuItem("Open Cache")) {
                     ImGuiFileDialog::Instance()->OpenDialog("OpenCacheDlg", "Open Cache File", ".cache.bin", config);
                 }
+
                 if (ImGui::MenuItem("Find")) {
                     uiState.showSearchWindow = true;
+                }
+                
+                // Recent files submenu
+                if (!state.recentCacheFiles.empty() && ImGui::BeginMenu("Recent Cache Files")) {
+                    for (const auto &filePair : state.recentCacheFiles) {
+                        std::string menuItemText;
+                        if (filePair.second.length() > 0)
+                            menuItemText = filePair.first + " | " + filePair.second;
+                        else
+                            menuItemText = filePair.first;
+                        if (ImGui::MenuItem(menuItemText.c_str())) {
+                            // Open the selected recent cache file
+                            state.lastCacheFile = filePair.first;
+                            state.originalFile = filePair.second;
+                            state.file.close();
+                            state.file.open(filePair.first, std::ios::binary);
+                            if (state.file) {
+                                state.file.seekg(0, std::ios::end);
+                                state.file_size = (size_t)state.file.tellg();
+                                state.file.seekg(0, std::ios::beg);
+                                state.all_cache_data.resize(state.file_size);
+                                state.file.read(reinterpret_cast<char *>(state.all_cache_data.data()), state.file_size);
+                                state.current_block = 0;
+                                state.block_slider = 0;
+                                state.redrawBlock = true;
+                                if (state.originalFile.empty()) {
+                                    state.promptForSource = true;
+                                }
+
+                                loadHexData(0);
+                                addToRecentFiles(state, filePair.first, filePair.second);
+                            }
+                        }
+                    }
+                    ImGui::EndMenu();
                 }
                 ImGui::EndMenu();
             }
@@ -422,6 +490,7 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                         state.current_block = 0;
                         state.block_slider = 0;
                         state.redrawBlock = true;
+                        loadHexData(0);
                     }
                     state.showCacheGen = false;
                 }
