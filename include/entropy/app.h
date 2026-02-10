@@ -80,6 +80,9 @@ struct AppState {
     std::map<std::string, bool> featureEnabled;
     ImGG::GradientWidget gradient_widget;
 
+    // Recent files
+    std::vector<std::pair<std::string, std::string>> recentCacheFiles;
+
     void resetHexDisplayGradientColors();
 };
 
@@ -91,5 +94,6 @@ void updateAutoplay(AppState &state);
 void initializeWindowAndGL(GLFWwindow *&window, GLuint &tex);
 void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState, IGFD::FileDialogConfig &config,
               std::function<void(size_t)> loadHexData);
+void addToRecentFiles(AppState &state, const std::string &cache_path, const std::string &file_path);
 
 } // namespace entropy
