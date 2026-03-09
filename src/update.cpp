@@ -8,6 +8,10 @@
 #include <sstream>
 #include <thread>
 
+#ifdef _WIN32
+#include <winhttp.h>
+#pragma comment(lib, "winhttp.lib")
+#endif
 namespace entropy {
 
 static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
@@ -55,13 +59,14 @@ void startUpdateCheck(UiState &uiState, const std::string &file_path, bool manua
         const std::string full_url = base + file_path;
         const std::string release_page = "https://github.com/maede97/EntropyVisualizer/releases";
 
+        std::string response;
+#ifdef __linux__
         CURL *curl = curl_easy_init();
         if (!curl) {
             uiState.updateChecked = true;
             return;
         }
 
-        std::string response;
         curl_easy_setopt(curl, CURLOPT_URL, full_url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
@@ -78,6 +83,89 @@ void startUpdateCheck(UiState &uiState, const std::string &file_path, bool manua
         }
 
         curl_easy_cleanup(curl);
+#endif
+#ifdef _WIN32
+        DWORD dwSize = 0;
+        DWORD dwDownloaded = 0;
+        BOOL bResults = FALSE;
+
+        HINTERNET hSession = NULL;
+        HINTERNET hConnect = NULL;
+        HINTERNET hRequest = NULL;
+
+        URL_COMPONENTS urlComp{};
+        urlComp.dwStructSize = sizeof(urlComp);
+        urlComp.dwHostNameLength = (DWORD)-1;
+        urlComp.dwUrlPathLength = (DWORD)-1;
+
+        std::wstring wurl(full_url.begin(), full_url.end());
+
+        if (!WinHttpCrackUrl(wurl.c_str(), (DWORD)wurl.size(), 0, &urlComp)) {
+            uiState.updateChecked = true;
+            return;
+        }
+
+        // Open session
+        hSession = WinHttpOpen(L"EntropyVisualizer Update Checker/1.0", WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME,
+                               WINHTTP_NO_PROXY_BYPASS, 0);
+
+        // Connect
+        if (hSession) {
+            std::wstring host(urlComp.lpszHostName, urlComp.dwHostNameLength);
+
+            hConnect = WinHttpConnect(hSession, host.c_str(), urlComp.nPort, 0);
+        }
+
+        // Open request
+        if (hConnect) {
+            std::wstring path(urlComp.lpszUrlPath, urlComp.dwUrlPathLength);
+
+            hRequest = WinHttpOpenRequest(hConnect, L"GET", path.c_str(), NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
+                                          (urlComp.nScheme == INTERNET_SCHEME_HTTPS) ? WINHTTP_FLAG_SECURE : 0);
+        }
+
+        // Send request
+        if (hRequest) {
+            bResults = WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0);
+        }
+
+        // Receive response
+        if (bResults)
+            bResults = WinHttpReceiveResponse(hRequest, NULL);
+
+        // Read response
+        if (bResults) {
+            do {
+                dwSize = 0;
+
+                if (!WinHttpQueryDataAvailable(hRequest, &dwSize))
+                    break;
+
+                if (!dwSize)
+                    break;
+
+                std::vector<char> buffer(dwSize + 1);
+                ZeroMemory(buffer.data(), dwSize + 1);
+
+                if (!WinHttpReadData(hRequest, buffer.data(), dwSize, &dwDownloaded)) {
+                    break;
+                }
+
+                response.append(buffer.data(), dwDownloaded);
+
+            } while (dwSize > 0);
+        }
+
+        // Cleanup
+        if (hRequest)
+            WinHttpCloseHandle(hRequest);
+        if (hConnect)
+            WinHttpCloseHandle(hConnect);
+        if (hSession)
+            WinHttpCloseHandle(hSession);
+
+        uiState.updateChecked = true;
+#endif
 
         // Trim whitespace
         std::string trimmed = response;
