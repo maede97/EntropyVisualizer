@@ -29,7 +29,7 @@ jobs:
     - name: Install dependencies (Windows)
       if: runner.os == 'Windows'
       run: |
-        winget install -e --id cURL.cURL
+        winget install -e --id cURL.cURL --silent
 
     - name: Configure and build (Linux)
       if: runner.os == 'Linux'
