@@ -1,6 +1,7 @@
 #include <entropy/hex_display_feature_manager.h>
 #include <entropy/hexdisplay/55aa_finder.h>
 #include <entropy/hexdisplay/aewf_detector.h>
+#include <entropy/hexdisplay/executable_finder.h>
 #include <entropy/hexdisplay/zero_bytes.h>
 #include <iostream>
 
@@ -19,6 +20,7 @@ void HexDisplayFeatureManager::loadFeatures() {
     features.push_back(new ZeroBytesFeature());
     features.push_back(new AA55FinderFeature());
     features.push_back(new AEWFDetector());
+    features.push_back(new ExecutableDisplayFeature());
 }
 
 } // namespace entropy
