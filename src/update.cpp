@@ -2,7 +2,6 @@
 #include <entropy/version.h>
 
 #include <chrono>
-#include <curl/curl.h>
 #include <iostream>
 #include <regex>
 #include <sstream>
@@ -12,6 +11,11 @@
 #include <winhttp.h>
 #pragma comment(lib, "winhttp.lib")
 #endif
+
+#if __linux__
+#include <curl/curl.h>
+#endif
+
 namespace entropy {
 
 static size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
