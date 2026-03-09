@@ -12,6 +12,7 @@
 #include <imgui_gradient/imgui_gradient.hpp>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -32,6 +33,13 @@ struct UiState {
     bool showSearchWindow = false;
     bool showFeatureSettings = false;
     bool showGeneralSettings = false;
+    // Update check state
+    std::atomic<bool> updateChecked{false};
+    std::atomic<bool> updateAvailable{false};
+    std::atomic<bool> updateManualRequest{false};
+    std::string latestVersion;
+    std::string updateUrl;
+    std::mutex updateMutex;
     size_t highlighted_sector = SIZE_MAX;
     std::vector<uint8_t> currentSectorData;
     size_t currentSectorIndex = 0;

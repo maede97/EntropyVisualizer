@@ -20,6 +20,21 @@ set(IMGUI_BACKEND_SRC
     external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
+if(WIN32)
+    # fetch curl
+    include(FetchContent)
+    FetchContent_Declare(
+        curl
+        URL https://curl.se/download/curl-8.5.0.tar.gz
+        DOWNLOAD_EXTRACT_TIMESTAMP true
+        OVERRIDE_FIND_PACKAGE
+    )
+    FetchContent_MakeAvailable(curl)
+else()
+# On Linux, we can use the system's libcurl
+    find_package(CURL REQUIRED)
+endif()
+
 # --- IMGUI ---
 add_library(imgui STATIC ${IMGUI_CORE_SRC} ${IMGUI_BACKEND_SRC})
 target_include_directories(imgui PUBLIC external/imgui)
@@ -58,9 +73,9 @@ target_include_directories(ui PUBLIC include external/imgui external/ImGuiFileDi
 target_link_libraries(ui PUBLIC core imgui glad glfw imguifiledialog imgui_gradient)
 
 # --- App library ---
-add_library(app STATIC src/app.cpp)
+add_library(app STATIC src/app.cpp src/update.cpp)
 target_include_directories(app PUBLIC include ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(app PUBLIC core cache ui imgui glad glfw hex_display_feature_manager)
+target_link_libraries(app PUBLIC core cache ui imgui glad glfw hex_display_feature_manager CURL::libcurl)
 
 if(WIN32)
     add_executable(EntropyVisualizer WIN32 main.cpp)

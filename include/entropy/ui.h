@@ -24,6 +24,7 @@ void renderAboutWindow(UiState &uiState);
 void renderHelpWindow(UiState &uiState);
 void renderHexViewWindow(UiState &uiState, const AppState &appState);
 void renderSearchWindow(UiState &uiState, AppState &appState, std::function<void(size_t)> loadHexData);
+void renderUpdateWindow(UiState &uiState);
 void handleFileDialogs(UiState &uiState, AppState &appState, IGFD::FileDialogConfig &config, std::function<void(size_t)> loadHexData);
 void renderVisualization(ImDrawList *draw_list, GLuint tex, const std::vector<uint8_t> &block_buffer, float zoom, ImVec2 pan_offset,
                          size_t current_block, size_t block_size, size_t block_width, size_t block_height, UiState &uiState,
