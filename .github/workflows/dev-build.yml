@@ -26,11 +26,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential cmake libgl1-mesa-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libwayland-dev libxkbcommon-dev libcurl4-openssl-dev
-    - name: Install dependencies (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        winget install -e --id cURL.cURL --accept-source-agreements
-
     - name: Configure and build (Linux)
       if: runner.os == 'Linux'
       run: |

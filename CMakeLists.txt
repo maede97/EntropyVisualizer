@@ -71,10 +71,21 @@ endif()
 target_include_directories(EntropyVisualizer PUBLIC include external/imgui external/ImGuiFileDialog)
 target_link_libraries(EntropyVisualizer app)
 
-# --- libcurl for update checking ---
-find_package(CURL REQUIRED)
-if(CURL_FOUND)
+if(WIN32)
+    # fetch curl
+    include(FetchContent)
+    FetchContent_Declare(
+        curl
+        URL https://curl.se/download/curl-8.5.0.tar.gz
+    )
+    FetchContent_MakeAvailable(curl)
     target_link_libraries(EntropyVisualizer CURL::libcurl)
+else()
+    # --- libcurl for update checking ---
+    find_package(CURL REQUIRED)
+    if(CURL_FOUND)
+        target_link_libraries(EntropyVisualizer CURL::libcurl)
+    endif()
 endif()
 
 if (WIN32)
