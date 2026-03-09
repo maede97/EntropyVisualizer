@@ -91,7 +91,7 @@ void startUpdateCheck(UiState &uiState, const std::string &file_path, bool manua
             start++;
         trimmed = (start < trimmed.size()) ? trimmed.substr(start) : std::string();
 
-        std::string local_version = VERSION;
+        std::string local_version = EV_VERSION;
         std::string remote_version = trimmed;
 
         int cmp = compare_semver(local_version, remote_version);

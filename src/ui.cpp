@@ -70,7 +70,7 @@ void renderUpdateWindow(UiState &uiState) {
             }
         } else {
             // Manual request and no update available
-            ImGui::Text("No updates available. You are running version %s", VERSION);
+            ImGui::Text("No updates available. You are running version %s", EV_VERSION);
             ImGui::Separator();
             if (ImGui::Button("OK")) {
                 uiState.updateManualRequest = false;
