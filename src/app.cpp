@@ -2,6 +2,7 @@
 #include <entropy/app.h>
 #include <entropy/cache.h>
 #include <entropy/icon.h>
+#include <entropy/update.h>
 #include <entropy/version.h>
 #include <iostream>
 #include <string>
@@ -389,7 +390,7 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
                 if (ImGui::MenuItem("Find")) {
                     uiState.showSearchWindow = true;
                 }
-                
+
                 // Recent files submenu
                 if (!state.recentCacheFiles.empty() && ImGui::BeginMenu("Recent Cache Files")) {
                     for (const auto &filePair : state.recentCacheFiles) {
@@ -428,6 +429,18 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
             }
 
             if (ImGui::BeginMenu("Misc")) {
+                if (ImGui::MenuItem("Check for Updates")) {
+                    // Reset state and start an explicit check (manual)
+                    uiState.updateChecked = false;
+                    uiState.updateAvailable = false;
+                    uiState.updateManualRequest = true;
+                    {
+                        std::lock_guard<std::mutex> lk(uiState.updateMutex);
+                        uiState.latestVersion.clear();
+                        uiState.updateUrl.clear();
+                    }
+                    startUpdateCheck(uiState, "update/latest_version.txt", true);
+                }
                 if (ImGui::MenuItem("About")) {
                     uiState.showAboutUs = true;
                 }
@@ -581,6 +594,7 @@ void mainLoop(GLFWwindow *window, GLuint tex, AppState &state, UiState &uiState,
         renderHelpWindow(uiState);
         renderHexViewWindow(uiState, state);
         renderSearchWindow(uiState, state, loadHexData);
+        renderUpdateWindow(uiState);
 
         if (uiState.showFeatureSettings) {
             ImGui::Begin("Feature Settings", &uiState.showFeatureSettings);

@@ -17,6 +17,7 @@
 #include <entropy/core.h>
 #include <entropy/icon.h>
 #include <entropy/ui.h>
+#include <entropy/update.h>
 #include <entropy/version.h>
 
 entropy::AppState *globalAppState = nullptr;
@@ -47,6 +48,9 @@ int main(int argc, char **argv) {
         std::cerr << "Failed to create window\n";
         return 1;
     }
+
+    // Start background update check (non-blocking)
+    entropy::startUpdateCheck(uiState, "VERSION.txt");
 
     // Register ImGui settings handler for features
     ImGuiSettingsHandler featuresHandler;

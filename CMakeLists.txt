@@ -58,7 +58,7 @@ target_include_directories(ui PUBLIC include external/imgui external/ImGuiFileDi
 target_link_libraries(ui PUBLIC core imgui glad glfw imguifiledialog imgui_gradient)
 
 # --- App library ---
-add_library(app STATIC src/app.cpp)
+add_library(app STATIC src/app.cpp src/update.cpp)
 target_include_directories(app PUBLIC include ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(app PUBLIC core cache ui imgui glad glfw hex_display_feature_manager)
 
@@ -70,6 +70,12 @@ endif()
 # --- Entropy Visualizer ---
 target_include_directories(EntropyVisualizer PUBLIC include external/imgui external/ImGuiFileDialog)
 target_link_libraries(EntropyVisualizer app)
+
+# --- libcurl for update checking ---
+find_package(CURL REQUIRED)
+if(CURL_FOUND)
+    target_link_libraries(EntropyVisualizer CURL::libcurl)
+endif()
 
 if (WIN32)
     # Add icon resource

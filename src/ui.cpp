@@ -7,6 +7,7 @@
 
 #include <GL/gl.h>
 #include <algorithm>
+#include <cstdlib>
 #include <map>
 
 namespace entropy {
@@ -38,6 +39,40 @@ void renderAboutWindow(UiState &uiState) {
         }
         ImGui::End();
     }
+}
+
+void renderUpdateWindow(UiState &uiState) {
+    if (!uiState.updateChecked)
+        return;
+
+    if (!uiState.updateAvailable && !uiState.updateManualRequest)
+        return;
+
+    std::lock_guard<std::mutex> lk(uiState.updateMutex);
+    ImGui::SetNextWindowSize(ImVec2(420, 140), ImGuiCond_FirstUseEver);
+    if (ImGui::Begin("Update", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (uiState.updateAvailable) {
+            ImGui::Text("A new version is available: %s", uiState.latestVersion.c_str());
+            ImGui::Separator();
+            if (ImGui::Button("Open Release Page")) {
+                std::string cmd = std::string("xdg-open \"") + uiState.updateUrl + "\" &";
+                std::system(cmd.c_str());
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Close")) {
+                uiState.updateAvailable = false;
+                uiState.updateManualRequest = false;
+            }
+        } else {
+            // Manual request and no update available
+            ImGui::Text("No updates available. You are running version %s", VERSION);
+            ImGui::Separator();
+            if (ImGui::Button("OK")) {
+                uiState.updateManualRequest = false;
+            }
+        }
+    }
+    ImGui::End();
 }
 
 void renderHelpWindow(UiState &uiState) {
