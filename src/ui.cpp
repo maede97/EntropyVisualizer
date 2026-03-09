@@ -55,7 +55,12 @@ void renderUpdateWindow(UiState &uiState) {
             ImGui::Text("A new version is available: %s", uiState.latestVersion.c_str());
             ImGui::Separator();
             if (ImGui::Button("Open Release Page")) {
+
+#ifdef __linux__
                 std::string cmd = std::string("xdg-open \"") + uiState.updateUrl + "\" &";
+#elif _WIN32
+                std::string cmd = std::string("start \"\" \"") + uiState.updateUrl + "\"";
+#endif
                 std::system(cmd.c_str());
             }
             ImGui::SameLine();
