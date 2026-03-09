@@ -2,7 +2,7 @@
 
 namespace entropy {
 
-#define EV_VERSION "1.9.0"
+#define EV_VERSION "1.9.1"
 #define EV_DATE "09.03.2026"
 
 } // namespace entropy

@@ -290,7 +290,7 @@ void initializeWindowAndGL(GLFWwindow *&window, GLuint &tex) {
         return;
 
     const char *glsl_version = "#version 130";
-    window = glfwCreateWindow(1800, 1200, (std::string("Entropy Visualizer ") + std::string(EV_VERSION)).c_str(), nullptr, nullptr);
+    window = glfwCreateWindow(1800, 1200, "Entropy Visualizer " EV_VERSION, nullptr, nullptr);
     if (!window)
         return;
 
