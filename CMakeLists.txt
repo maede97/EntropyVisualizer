@@ -78,6 +78,7 @@ if(WIN32)
         curl
         URL https://curl.se/download/curl-8.5.0.tar.gz
         DOWNLOAD_EXTRACT_TIMESTAMP true
+        OVERRIDE_FIND_PACKAGE
     )
     FetchContent_MakeAvailable(curl)
     target_link_libraries(EntropyVisualizer CURL::libcurl)
