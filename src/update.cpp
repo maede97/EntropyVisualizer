@@ -8,8 +8,8 @@
 #include <thread>
 
 #ifdef _WIN32
+#include <windows.h>
 #include <winhttp.h>
-#pragma comment(lib, "winhttp.lib")
 #endif
 
 #if __linux__

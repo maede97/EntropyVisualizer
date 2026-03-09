@@ -67,7 +67,7 @@ target_include_directories(app PUBLIC include ${CMAKE_CURRENT_SOURCE_DIR})
 if(LINUX)
     target_link_libraries(app PUBLIC core cache ui imgui glad glfw hex_display_feature_manager CURL::libcurl)
 else()
-    target_link_libraries(app PUBLIC core cache ui imgui glad glfw hex_display_feature_manager)
+    target_link_libraries(app PUBLIC core cache ui imgui glad glfw hex_display_feature_manager winhttp.lib)
 endif()
 
 if(WIN32)
