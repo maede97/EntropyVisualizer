@@ -61,10 +61,12 @@ void startUpdateCheck(UiState &uiState, const std::string &file_path, bool manua
     std::thread([&uiState, file_path, manual]() {
         const std::string base = "https://raw.githubusercontent.com/maede97/EntropyVisualizer/refs/heads/main/";
         const std::string full_url = base + file_path;
-        const std::string release_page = "https://github.com/maede97/EntropyVisualizer/releases";
 
         std::string response;
 #ifdef __linux__
+        const std::string release_page = "https://github.com/maede97/EntropyVisualizer/releases/download/"; // + version + EntropyVisualizer
+        const std::string suffix = "/EntropyVisualizer";
+
         CURL *curl = curl_easy_init();
         if (!curl) {
             uiState.updateChecked = true;
@@ -89,6 +91,8 @@ void startUpdateCheck(UiState &uiState, const std::string &file_path, bool manua
         curl_easy_cleanup(curl);
 #endif
 #ifdef _WIN32
+        const std::string release_page = "https://github.com/maede97/EntropyVisualizer/releases/download/"; // + version + EntropyVisualizer
+        const std::string suffix = "/EntropyVisualizer.exe";
         DWORD dwSize = 0;
         DWORD dwDownloaded = 0;
         BOOL bResults = FALSE;
@@ -189,7 +193,7 @@ void startUpdateCheck(UiState &uiState, const std::string &file_path, bool manua
             {
                 std::lock_guard<std::mutex> lk(uiState.updateMutex);
                 uiState.latestVersion = remote_version;
-                uiState.updateUrl = release_page;
+                uiState.updateUrl = release_page + "v" + remote_version + suffix;
             }
             uiState.updateAvailable = true;
         } else {
