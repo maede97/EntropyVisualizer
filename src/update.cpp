@@ -81,9 +81,6 @@ void startUpdateCheck(UiState &uiState, const std::string &file_path, bool manua
 
         // Trim whitespace
         std::string trimmed = response;
-
-        std::cout << "Latest version string from server: '" << trimmed << "'" << std::endl;
-
         while (!trimmed.empty() && isspace((unsigned char)trimmed.back()))
             trimmed.pop_back();
         size_t start = 0;
