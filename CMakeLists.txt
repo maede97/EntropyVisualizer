@@ -77,9 +77,11 @@ if(WIN32)
     FetchContent_Declare(
         curl
         URL https://curl.se/download/curl-8.5.0.tar.gz
+        DOWNLOAD_EXTRACT_TIMESTAMP true
     )
     FetchContent_MakeAvailable(curl)
     target_link_libraries(EntropyVisualizer CURL::libcurl)
+    target_include_directories(EntropyVisualizer PUBLIC ${curl_SOURCE_DIR}/include)
 else()
     # --- libcurl for update checking ---
     find_package(CURL REQUIRED)
